@@ -138,3 +138,41 @@ ComboBox:pressed, ComboBox:default:hover:pressed:focused, ComboBox:focused:hover
     -fx-background-radius: 15px;
     -fx-text-fill: white;
 }
+
+.tab-pane .tab-header-area .tab-header-background {
+    -fx-opacity: 1;
+}
+
+.tab {
+	-fx-background-color: #fff;
+	-fx-border-radius: 10px 10px 0px 0px;
+	-fx-border-color: #2E4053;
+	-fx-background-radius: 10px 10px 0px 0px;
+}
+
+.tab-pane .tab:selected {
+	-fx-border-radius: 10px 10px 0px 0px;
+	-fx-background-radius: 10px 10px 0px 0px;
+	-fx-background-color: #00833D;
+}
+
+.tab .tab:pressed {
+	-fx-border-radius: 10px 10px 0px 0px;
+	-fx-background-radius: 10px 10px 0px 0px;
+	-fx-border-radius: 10px 10px 0px 0px;
+	-fx-border-color: #2E4053;
+}
+
+.tab:selected .tab-label {
+	-fx-alignment: CENTER;
+	-fx-text-fill: white;
+}
+
+.tab-pane .tab:hover {
+	-fx-background-color: #34495e;
+}
+
+.tab:hover .tab-label {
+	-fx-alignment: CENTER;
+	-fx-text-fill: white;
+}
