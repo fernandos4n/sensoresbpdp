@@ -28,11 +28,11 @@
             <RowConstraints percentHeight="15.0" vgrow="SOMETIMES" />
         </rowConstraints>
          <children>
-            <Label fx:id="preguntaLabel" alignment="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="Preparando preguntas..." textAlignment="CENTER" wrapText="true" GridPane.columnIndex="1" GridPane.columnSpan="3" GridPane.rowIndex="1">
+            <Label fx:id="preguntaLabel" alignment="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" textAlignment="CENTER" wrapText="true" GridPane.columnIndex="1" GridPane.columnSpan="3" GridPane.rowIndex="1">
                <font>
                   <Font name="Ubuntu" size="38.0" />
                </font></Label>
-            <Label fx:id="instruccionLabel" alignment="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="Instruccion" textAlignment="CENTER" wrapText="true" GridPane.columnIndex="1" GridPane.columnSpan="3">
+            <Label fx:id="instruccionLabel" alignment="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" textAlignment="CENTER" wrapText="true" GridPane.columnIndex="1" GridPane.columnSpan="3">
                <font>
                   <Font name="Ubuntu" size="28.0" />
                </font></Label>
@@ -45,10 +45,15 @@
                   <Font size="30.0" />
                </font></Button>
             <ProgressBar fx:id="barraProgreso" maxWidth="1.7976931348623157E308" prefWidth="200.0" progress="0.0" GridPane.columnSpan="5" GridPane.rowIndex="5" />
-            <Label fx:id="tiempoLabel" alignment="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="Tiempo" textAlignment="CENTER">
+            <Label fx:id="tiempoLabel" alignment="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" textAlignment="CENTER">
                <font>
                   <Font size="24.0" />
                </font></Label>
+            <Button fx:id="botonIniciar" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#start" styleClass="boton-iniciar" text="Iniciar" textAlignment="CENTER" GridPane.columnIndex="2" GridPane.rowIndex="3">
+               <font>
+                  <Font size="30.0" />
+               </font>
+            </Button>
          </children>
       </GridPane>
    </children>
