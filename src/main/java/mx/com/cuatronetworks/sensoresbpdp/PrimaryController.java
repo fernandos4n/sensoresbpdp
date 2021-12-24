@@ -14,6 +14,9 @@ import com.opencsv.CSVReader;
 import com.opencsv.bean.CsvToBeanBuilder;
 import com.opencsv.exceptions.CsvException;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.stage.Stage;
 import mx.com.cuatronetworks.sensoresbpdp.model.Pregunta;
 import mx.com.cuatronetworks.sensoresbpdp.model.Respuesta;
 
@@ -39,12 +42,17 @@ public class PrimaryController {
 	
 	@FXML
 	private Button botonNo;
+
+    @FXML
+    private Button botonIniciar;
 	
 	@FXML
 	private ProgressBar barraProgreso;
 	
 	@FXML
 	private Label tiempoLabel;
+
+    private AdminController parentController;
 	
 	List<Respuesta> respuestasList = new ArrayList<Respuesta>();
 	List<Pregunta> preguntasList = new ArrayList<Pregunta>();
@@ -71,18 +79,19 @@ public class PrimaryController {
 	@FXML
 	private void initialize() {
 		System.out.println("Inicializando");
-        System.out.println("Abriendo la otra pantalla");
-
         customPolly = new TextToSpeech(Region.getRegion(Regions.US_EAST_1));
-		//barraProgreso = new ProgressBar(0);
-		try {
-			getPreguntas();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
-		timer = new Timer(5, new ActionListener() {
+        botonNo.setVisible(false);
+        botonSi.setVisible(false);
+	}
+
+    @FXML
+    private void start(){
+        botonIniciar.setVisible(false);
+        botonNo.setVisible(true);
+        botonSi.setVisible(true);
+        this.preguntasList = parentController.getPreguntasList();
+        totalPreguntas = preguntasList.size();
+        timer = new Timer(5, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 //Incrementa de 5 en 5 milisegundos
@@ -178,7 +187,7 @@ public class PrimaryController {
         });
         timer.setInitialDelay(0);
         timer.start();
-	}
+    }
 	
     @FXML
     private void switchToSecondary() throws IOException {
@@ -255,6 +264,7 @@ public class PrimaryController {
             @Override
             public void run() {
             	preguntaLabel.setText(pregunta);
+                parentController.getPreguntaLabel().setText(pregunta);
                 if(intQuestion < totalPreguntas){
                     modulo = intQuestion % 3;
                     if (modulo == 0) {
@@ -286,5 +296,13 @@ public class PrimaryController {
             });
             timer.stop();
         }
+    }
+
+    public AdminController getParentController() {
+        return parentController;
+    }
+
+    public void setParentController(AdminController parentController) {
+        this.parentController = parentController;
     }
 }
