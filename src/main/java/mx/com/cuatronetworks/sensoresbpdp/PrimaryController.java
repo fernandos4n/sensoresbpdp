@@ -35,7 +35,11 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 import javazoom.jl.decoder.JavaLayerException;
 
+/**
+ * @author Fernando Sánchez Castro
+ */
 public class PrimaryController {
+    /** Elementos FXML de la interfaz gráfica*/
 	@FXML
 	private Label preguntaLabel;
 	
@@ -57,8 +61,10 @@ public class PrimaryController {
 	@FXML
 	private Label tiempoLabel;
 
+	/** Controlador de la ventana principal*/
     private AdminController parentController;
-	
+
+	/** Elementos de las preguntas, tiempos y TextToSpeech */
 	List<Respuesta> respuestasList = new ArrayList<>();
 	List<Pregunta> preguntasList = new ArrayList<>();
 
@@ -78,15 +84,22 @@ public class PrimaryController {
     int cadaTiempo = 5;
     String tiempoInicio = "";
     String tiempoFinal = "";
-	
+
+    /**
+     * Función que se ejecuta al inicializar la interfaz gráfica
+     */
 	@FXML
 	private void initialize() {
-		System.out.println("Inicializando");
+		instruccionLabel.setText("Bienvenido");
+		preguntaLabel.setText("Presione INICIAR cuando esté listo");
         customPolly = new TextToSpeech(Region.getRegion(Regions.US_EAST_1));
         botonNo.setVisible(false);
         botonSi.setVisible(false);
 	}
 
+    /**
+     * Inicia las preguntas
+     */
     @FXML
     private void start(){
         botonIniciar.setVisible(false);
@@ -188,14 +201,23 @@ public class PrimaryController {
         timer.setInitialDelay(0);
         timer.start();
     }
-	
+
+    /**
+     * Función de prueba para cambiar a una pantalla adicional
+     * @throws IOException
+     */
     @FXML
     private void switchToSecondary() throws IOException {
         HelloApplication.setRoot("secondary");
     }
 
+    /**
+     * Función que se desencadena al hacer clic en el botón SI
+     * @throws IOException
+     */
     @FXML
     private void contestaSi() throws IOException{
+        enviarMarca(intQuestion+1, botonSi.getText());
         contesto = true;
         String pregunta=preguntasList.get(intQuestion).getRespuesta_esperada();
         tiempoFinal = min + ":" + seg + ":" + mil;
@@ -212,13 +234,18 @@ public class PrimaryController {
             System.out.println(preguntasList.get(intQuestion).getReactivo() + " RE: " + preguntasList.get(intQuestion).getRespuesta_esperada() + " R: " + " si" + " Tiempo inicio : " + tiempoInicio + " Tiempo final : " + tiempoFinal);
         }
         respuestasList.add(respuesta);
-        intQuestion++;
+        //intQuestion++;
         segundosxpregunta = 5;
         //enviarMarca()
     }
 
+    /**
+     * Función que se desencadena al hacer clic en el botón NO
+     * @throws IOException
+     */
     @FXML
     private void contestoNo() throws IOException{
+        enviarMarca(intQuestion+1, botonNo.getText());
         contesto = true;
         String pregunta=preguntasList.get(intQuestion).getReactivo();
         tiempoFinal = min + ":" + seg + ":" + mil;
@@ -235,11 +262,17 @@ public class PrimaryController {
             System.out.println(pregunta + " RE: " + preguntasList.get(intQuestion).getRespuesta_esperada() + " R: " + " no" + " Tiempo inicio : " + tiempoInicio + " Tiempo final : " + tiempoFinal);
         }
         respuestasList.add(respuesta);
-        intQuestion++;
+        //intQuestion++;
         segundosxpregunta = 5;
     }
 
+    /**
+     * Obtiene la pregunta para mostrarla en pantalla y la reproduce
+     * @throws IOException
+     * @throws JavaLayerException
+     */
     public void GenerarPreguntas() throws IOException, JavaLayerException {
+        System.out.println("Número de pregunta: " + intQuestion+1);
         contesto = false;
         String pregunta=preguntasList.get(intQuestion).getReactivo();
         //String pregunta = "Reproduciendo pregunta " + intQuestion ;
@@ -299,17 +332,20 @@ public class PrimaryController {
         }
     }
 
+    /**
+     * Envía los datos a la pantalla de Administración
+     * @param numPregunta
+     * @param respuesta
+     */
     private void enviarMarca(Integer numPregunta, String respuesta){
         Platform.runLater(
-                new Runnable() {
-                    @Override
-                    public void run() {
-                        parentController.getNumPreguntaLabel().setText(numPregunta.toString());
-                        parentController.getRespuestaLabel().setText(respuesta);
-                    }
-                }
+            () -> {
+                parentController.getNumPreguntaLabel().setText(numPregunta.toString());
+                parentController.getRespuestaLabel().setText(respuesta);
+            }
         );
     }
+    /** GETTERS & SETTERS */
 
     public AdminController getParentController() {
         return parentController;
@@ -317,5 +353,21 @@ public class PrimaryController {
 
     public void setParentController(AdminController parentController) {
         this.parentController = parentController;
+    }
+
+    public Button getBotonSi() {
+        return botonSi;
+    }
+
+    public void setBotonSi(Button botonSi) {
+        this.botonSi = botonSi;
+    }
+
+    public Button getBotonNo() {
+        return botonNo;
+    }
+
+    public void setBotonNo(Button botonNo) {
+        this.botonNo = botonNo;
     }
 }

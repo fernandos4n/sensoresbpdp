@@ -64,6 +64,12 @@ ComboBox:pressed, ComboBox:default:hover:pressed:focused, ComboBox:focused:hover
     -fx-border-color: #4DFFB2;
 }
 
+ChoiceBox {
+	-fx-background-color: #fff;
+	-fx-border-color: #00833D;
+	-fx-border-radius: 15px;
+}
+
 /************************************ L O G I N ***********************************/
 
 .boton-iniciar{
