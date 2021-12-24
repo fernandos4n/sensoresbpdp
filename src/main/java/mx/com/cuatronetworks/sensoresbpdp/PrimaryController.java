@@ -49,7 +49,7 @@ public class PrimaryController {
 	List<Respuesta> respuestasList = new ArrayList<Respuesta>();
 	List<Pregunta> preguntasList = new ArrayList<Pregunta>();
 	
-	static final String CSV_FILENAME = "/home/fernandosanchez/Documentos/reactivos/4NReactivos.csv";
+	static final String CSV_FILENAME = "/home/david/Documentos/reactivos/4NReactivos.csv";
 	
 	Timer timer;
 	TextToSpeech customPolly = null;
