@@ -15,6 +15,8 @@ module mx.com.cuatronetworks.sensoresbpdp {
     requires aws.java.sdk.polly;
     requires opencsv;
     requires java.sql;
+    requires jfreechart;
+    requires jfreechart.fx;
 
     opens mx.com.cuatronetworks.sensoresbpdp to javafx.fxml;
     exports mx.com.cuatronetworks.sensoresbpdp;
