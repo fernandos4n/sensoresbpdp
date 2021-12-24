@@ -4,12 +4,14 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 import javax.swing.Timer;
 
+import com.amazonaws.services.polly.model.OutputFormat;
 import com.opencsv.CSVReader;
 import com.opencsv.bean.CsvToBeanBuilder;
 import com.opencsv.exceptions.CsvException;
@@ -17,6 +19,9 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import javazoom.jl.player.advanced.AdvancedPlayer;
+import javazoom.jl.player.advanced.PlaybackEvent;
+import javazoom.jl.player.advanced.PlaybackListener;
 import mx.com.cuatronetworks.sensoresbpdp.model.Pregunta;
 import mx.com.cuatronetworks.sensoresbpdp.model.Respuesta;
 
@@ -54,11 +59,9 @@ public class PrimaryController {
 
     private AdminController parentController;
 	
-	List<Respuesta> respuestasList = new ArrayList<Respuesta>();
-	List<Pregunta> preguntasList = new ArrayList<Pregunta>();
-	
-	static final String CSV_FILENAME = "/home/david/Documentos/reactivos/4NReactivos.csv";
-	
+	List<Respuesta> respuestasList = new ArrayList<>();
+	List<Pregunta> preguntasList = new ArrayList<>();
+
 	Timer timer;
 	TextToSpeech customPolly = null;
 	int score = 0;
@@ -91,98 +94,95 @@ public class PrimaryController {
         botonSi.setVisible(true);
         this.preguntasList = parentController.getPreguntasList();
         totalPreguntas = preguntasList.size();
-        timer = new Timer(5, new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                //Incrementa de 5 en 5 milisegundos
-                milesimas += 5;
-                //Cuando llega a 1000 = 1 segundo aumenta 1 segundo
-                //y las milesimas de segundo de nuevo a 0
-                if (milesimas == 1000) {
-                    milesimas = 0;
-                    segundos += 1;
-                    segundosxpregunta += 1;//segundo para cada pregunta
-                    //Si los segundos llegan a 60 entonces aumenta 1 los minutos
-                    //y los segundos vuelven a 0
-                    if (segundos == 60) {
-                        segundos = 0;
-                        minutos++;
-                    }
+        timer = new Timer(5, e -> {
+            //Incrementa de 5 en 5 milisegundos
+            milesimas += 5;
+            //Cuando llega a 1000 = 1 segundo aumenta 1 segundo
+            //y las milesimas de segundo de nuevo a 0
+            if (milesimas == 1000) {
+                milesimas = 0;
+                segundos += 1;
+                segundosxpregunta += 1;//segundo para cada pregunta
+                //Si los segundos llegan a 60 entonces aumenta 1 los minutos
+                //y los segundos vuelven a 0
+                if (segundos == 60) {
+                    segundos = 0;
+                    minutos++;
                 }
-                //Formato 00:00:000
-                if (minutos < 10) {
-                    min = "0" + minutos;
-                } else {
-                    min = minutos.toString();
+            }
+            //Formato 00:00:000
+            if (minutos < 10) {
+                min = "0" + minutos;
+            } else {
+                min = minutos.toString();
+            }
+            if (segundos < 10) {
+                seg = "0" + segundos;
+            } else {
+                seg = segundos.toString();
+            }
+            if (milesimas < 10) {
+                mil = "00" + milesimas;
+            } else if (milesimas < 100) {
+                mil = "0" + milesimas;
+            } else {
+                mil = milesimas.toString();
+            }
+            //Se inseta el formato Tiempo : 00 : 00 : 00
+            //tiempoLabel.setText("Tiempo : " + min + ":" + seg + ":" + mil);
+            System.out.println("Tiempo : " + min + ":" + seg + ":" + mil);
+            // count = count + 1;
+            if (segundosxpregunta == 5) {
+                segundosxpregunta = 0;
+                barraProgreso.setProgress(0.001);
+                System.out.println("Tiempo inicial: " + barraProgreso.getProgress());
+                if (contesto && intQuestion != 0) {
+                    intQuestion++;
                 }
-                if (segundos < 10) {
-                    seg = "0" + segundos;
-                } else {
-                    seg = segundos.toString();
+                if (contesto && intQuestion == 0) {
+                    System.out.println("No contesto true");
+                    Respuesta respuesta = new Respuesta();
+                    respuesta.setCorrecto(0);
+                    respuesta.setPregunta(intQuestion);
+                    respuesta.setRespuesta(2);
+                    respuestasList.add(respuesta);
+                    tiempoFinal = min + ":" + seg + ":" + mil;
+                    System.out.println(preguntasList.get(intQuestion).getReactivo() + " RE: " + preguntasList.get(intQuestion).getRespuesta_esperada() + " R: " + " null" + " Tiempo inicio : " + tiempoInicio + " Tiempo final : " + tiempoFinal);
+                    intQuestion++;
                 }
-                if (milesimas < 10) {
-                    mil = "00" + milesimas;
-                } else if (milesimas < 100) {
-                    mil = "0" + milesimas;
-                } else {
-                    mil = milesimas.toString();
+                if (!contesto && intQuestion == 0 && segundos == 5) {
+                    System.out.println("No contesto false pregunta 0");
+                    Respuesta respuesta = new Respuesta();
+                    respuesta.setCorrecto(0);
+                    respuesta.setPregunta(intQuestion);
+                    respuesta.setRespuesta(2);
+                    respuestasList.add(respuesta);
+                    tiempoFinal = min + ":" + seg + ":" + mil;
+                    System.out.println(preguntasList.get(intQuestion).getReactivo() + " RE: " + preguntasList.get(intQuestion).getRespuesta_esperada() + " R: " + " null" + " Tiempo inicio : " + tiempoInicio + " Tiempo final : " + tiempoFinal);
+                    intQuestion++;
                 }
-                //Se inseta el formato Tiempo : 00 : 00 : 00
-                //tiempoLabel.setText("Tiempo : " + min + ":" + seg + ":" + mil);
-                System.out.println("Tiempo : " + min + ":" + seg + ":" + mil);
-                // count = count + 1;
-                if (segundosxpregunta == 5) {
-                    segundosxpregunta = 0;
-                    barraProgreso.setProgress(0.001);
-                    System.out.println("Tiempo inicial: " + barraProgreso.getProgress());
-                    if (contesto == true && intQuestion != 0) {
-                        intQuestion++;
-                    }
-                    if (contesto == true && intQuestion == 0) {
-                        System.out.println("No contesto true");
-                        Respuesta respuesta = new Respuesta();
-                        respuesta.setCorrecto(0);
-                        respuesta.setPregunta(intQuestion);
-                        respuesta.setRespuesta(2);
-                        respuestasList.add(respuesta);
-                        tiempoFinal = min + ":" + seg + ":" + mil;
-                        System.out.println(preguntasList.get(intQuestion).getReactivo() + " RE: " + preguntasList.get(intQuestion).getRespuesta_esperada() + " R: " + " null" + " Tiempo inicio : " + tiempoInicio + " Tiempo final : " + tiempoFinal);
-                        intQuestion++;
-                    }
-                    if (contesto == false && intQuestion == 0 && segundos == 5) {
-                        System.out.println("No contesto false pregunta 0");
-                        Respuesta respuesta = new Respuesta();
-                        respuesta.setCorrecto(0);
-                        respuesta.setPregunta(intQuestion);
-                        respuesta.setRespuesta(2);
-                        respuestasList.add(respuesta);
-                        tiempoFinal = min + ":" + seg + ":" + mil;
-                        System.out.println(preguntasList.get(intQuestion).getReactivo() + " RE: " + preguntasList.get(intQuestion).getRespuesta_esperada() + " R: " + " null" + " Tiempo inicio : " + tiempoInicio + " Tiempo final : " + tiempoFinal);
-                        intQuestion++;
-                    }
 
-                    if (contesto == false && intQuestion != 0 && segundos > 5) {
-                        System.out.println("No contesto false pregunta !=0 ");
-                        Respuesta respuesta = new Respuesta();
-                        respuesta.setCorrecto(0);
-                        respuesta.setPregunta(intQuestion);
-                        respuesta.setRespuesta(2);
-                        respuestasList.add(respuesta);
-                        tiempoFinal = min + ":" + seg + ":" + mil;
-                        System.out.println(preguntasList.get(intQuestion).getReactivo() + " RE: " + preguntasList.get(intQuestion).getRespuesta_esperada() + " R: " + " null" + " Tiempo inicio : " + tiempoInicio + " Tiempo final : " + tiempoFinal);
-                        intQuestion++;
-                    }
-                    try {
-                        GenerarPreguntas();
-                    } catch (Exception ex) {
-                        ex.printStackTrace();
-                    }
+                if (!contesto && intQuestion != 0 && segundos > 5) {
+                    System.out.println("No contesto false pregunta !=0 ");
+                    Respuesta respuesta = new Respuesta();
+                    respuesta.setCorrecto(0);
+                    respuesta.setPregunta(intQuestion);
+                    respuesta.setRespuesta(2);
+                    respuestasList.add(respuesta);
+                    tiempoFinal = min + ":" + seg + ":" + mil;
+                    System.out.println(preguntasList.get(intQuestion).getReactivo() + " RE: " + preguntasList.get(intQuestion).getRespuesta_esperada() + " R: " + " null" + " Tiempo inicio : " + tiempoInicio + " Tiempo final : " + tiempoFinal);
+                    intQuestion++;
                 }
-                value = segundosxpregunta * .25;
-                barraProgreso.setProgress(value);
-                if (minutos == 12) {
-                    ((Timer) (e.getSource())).stop();
+                try {
+                    GenerarPreguntas();
+                } catch (Exception ex) {
+                    ex.printStackTrace();
                 }
+            }
+            value = segundosxpregunta * .25;
+            barraProgreso.setProgress(value);
+            if (minutos == 12) {
+                ((Timer) (e.getSource())).stop();
             }
         });
         timer.setInitialDelay(0);
@@ -200,7 +200,7 @@ public class PrimaryController {
         String pregunta=preguntasList.get(intQuestion).getRespuesta_esperada();
         tiempoFinal = min + ":" + seg + ":" + mil;
         Respuesta respuesta = new Respuesta();
-        if (pregunta == "si" || preguntasList.get(intQuestion).getRespuesta_esperada().equals("si")) {
+        if (pregunta.equals("si") || preguntasList.get(intQuestion).getRespuesta_esperada().equals("si")) {
             respuesta.setCorrecto(1);
             respuesta.setPregunta(intQuestion);
             respuesta.setRespuesta(1);
@@ -213,12 +213,8 @@ public class PrimaryController {
         }
         respuestasList.add(respuesta);
         intQuestion++;
-        segundosxpregunta = 0;
-        try {
-            GenerarPreguntas();
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
+        segundosxpregunta = 5;
+        //enviarMarca()
     }
 
     @FXML
@@ -240,20 +236,7 @@ public class PrimaryController {
         }
         respuestasList.add(respuesta);
         intQuestion++;
-        segundosxpregunta = 0;
-        try {
-            GenerarPreguntas();
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-    }
-
-    public void getPreguntas() throws IOException {
-        preguntasList = (List<Pregunta>) new CsvToBeanBuilder(new FileReader(CSV_FILENAME))
-                .withType(Pregunta.class).withSkipLines(1)
-                .build()
-                .parse();
-        totalPreguntas = preguntasList.size();
+        segundosxpregunta = 5;
     }
 
     public void GenerarPreguntas() throws IOException, JavaLayerException {
@@ -281,21 +264,51 @@ public class PrimaryController {
         });
         
         tiempoInicio = min + ":" + seg + ":" + mil;
-        barraProgreso.setProgress(1);
+        //barraProgreso.setProgress(1);
         if (intQuestion < totalPreguntas) {
-           System.out.println(pregunta);
-           customPolly.play(pregunta);
+            InputStream speechStream = customPolly.synthesize(pregunta, OutputFormat.Mp3);
+            AdvancedPlayer player = new AdvancedPlayer(speechStream,javazoom.jl.player.FactoryRegistry.systemRegistry().createAudioDevice());
+
+            player.setPlayBackListener(new PlaybackListener() {
+                @Override
+                public void playbackStarted(PlaybackEvent evt) {
+                    System.out.println("Playback started");
+                    botonNo.setDisable(true);
+                    botonSi.setDisable(true);
+                }
+                @Override
+                public void playbackFinished(PlaybackEvent evt) {
+                    System.out.println("Playback finished");
+                    botonNo.setDisable(false);
+                    botonSi.setDisable(false);
+                }
+            });
+            player.play();
+            //customPolly.play(pregunta);
         } else {
             Platform.runLater(new Runnable() {
                 @Override
                 public void run() {
-                    preguntaLabel.setText("Prueba finalizada");
+                    preguntaLabel.setText("Prueba Finalizada");
+                    parentController.getPreguntaLabel().setText("Prueba Finalizada");
                     botonSi.setVisible(false);
                     botonNo.setVisible(false);
                 }
             });
             timer.stop();
         }
+    }
+
+    private void enviarMarca(Integer numPregunta, String respuesta){
+        Platform.runLater(
+                new Runnable() {
+                    @Override
+                    public void run() {
+                        parentController.getNumPreguntaLabel().setText(numPregunta.toString());
+                        parentController.getRespuestaLabel().setText(respuesta);
+                    }
+                }
+        );
     }
 
     public AdminController getParentController() {

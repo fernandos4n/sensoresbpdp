@@ -176,3 +176,18 @@ ComboBox:pressed, ComboBox:default:hover:pressed:focused, ComboBox:focused:hover
 	-fx-alignment: CENTER;
 	-fx-text-fill: white;
 }
+.progress-bar {
+    -fx-border-radius: 5px;
+    -fx-background-radius: 5px;
+    -fx-background-color: white;
+    -fx-border-color: #00833D;
+    -fx-border-width: 2px;
+    -fx-text-fill: #000;
+}
+
+.progress-bar .bar {
+    -fx-border-radius: 5px;
+    -fx-background-radius: 5px;
+    -fx-background-color: linear-gradient(to left, #0f3443, #34e89e);
+}
+
