@@ -342,6 +342,7 @@ public class PrimaryController {
             () -> {
                 parentController.getNumPreguntaLabel().setText(numPregunta.toString());
                 parentController.getRespuestaLabel().setText(respuesta);
+                parentController.setBandera(true);
             }
         );
     }

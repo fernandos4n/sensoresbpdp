@@ -1,6 +1,8 @@
 package mx.com.cuatronetworks.sensoresbpdp;
 
 import com.opencsv.bean.CsvToBeanBuilder;
+import com.panamahitek.ArduinoException;
+import com.panamahitek.PanamaHitek_Arduino;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -13,6 +15,9 @@ import javafx.scene.layout.AnchorPane;
 import javafx.stage.FileChooser;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
+import jssc.SerialPortEvent;
+import jssc.SerialPortEventListener;
+import jssc.SerialPortException;
 import mx.com.cuatronetworks.sensoresbpdp.model.Pregunta;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.DateAxis;
@@ -31,7 +36,10 @@ import java.awt.*;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 
 public class AdminController {
@@ -64,16 +72,16 @@ public class AdminController {
     private CheckBox verdaderoFalso;
 
     // Sensores
-    private final String puertoSerialGSR = "/dev/ttyACM0";
+    private final String puertoSerialGSR = "/dev/ttyUSB0";
     private final String puertoSerialPPG = "/dev/ttyUSB0";
     private final int baudingPPG = 115200;
-    private final int baudingGSR = 9600;
+    private final int baudingGSR = 115200;
 
     //Arduino
-    /*
+
     PanamaHitek_Arduino ino = new PanamaHitek_Arduino();
     PanamaHitek_Arduino ino2 = new PanamaHitek_Arduino();
-*/
+
     //VARIABLES sensor PPG
     final XYSeries Serie = new XYSeries("PPG");
     final XYSeriesCollection Coleccion = new XYSeriesCollection();
@@ -106,6 +114,16 @@ public class AdminController {
     JFreeChart Grafica;
     final DateAxis timeAxis = new DateAxis("Time");
     final CombinedDomainXYPlot plot = new CombinedDomainXYPlot(timeAxis);
+    double rangoInferiorPPG = 490.0;
+    double rangoSuperiorPPG = 550.0;
+    double rangoInferiorGSR = 10.0;
+    double rangoSuperiorGSR = 80.0;
+    double rangoInferiorET = 2.0;
+    double rangoSuperiorET = 5.0;
+
+    // Markers
+    final List<XYSeries> markers = new ArrayList<XYSeries>();
+    private boolean bandera = false;
 
     private int numPregunta;
     private List<Pregunta> preguntasList;
@@ -115,7 +133,7 @@ public class AdminController {
     private int totalPreguntas = 0;
 
     // Varios
-    int i = 0, j = 0;
+    int i = 0, j = 0, k = 0;
 
     @FXML
     private void initialize(){
@@ -184,7 +202,8 @@ public class AdminController {
         ChartViewer viewer = new ChartViewer(Grafica);
         Stage stage2 = new Stage();
         stage2.setScene(new Scene(viewer));
-        stage2.setTitle("hehe");
+        stage2.setTitle("Gráficas");
+        stage2.setMaximized(true);
         stage2.show();
 
         // Carga la segunda ventana
@@ -221,30 +240,20 @@ public class AdminController {
             tabPane.getSelectionModel().selectFirst();
         });
         stage.show();
+
+        try{
+            // TODO: Revisar los puertos correctos
+            ino.arduinoRX(puertoSerialGSR, baudingPPG, Listener);
+            // TODO: Descomentar
+            //ino2.arduinoRX(puertoSerialPPG, baudingPPG, ListenerGSR);
+        }catch(ArduinoException ex){
+            Logger.getLogger(AdminController.class.getName()).log(Level.SEVERE, null, ex);
+        }catch(SerialPortException ex){
+            Logger.getLogger(AdminController.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
-    /** Listeners de sensores */
-    //Serial port pulso
-            /*
-    SerialPortEventListener Listener = new SerialPortEventListener() {
-        @Override
-        public void serialEvent(SerialPortEvent spe) {
-            try {
-                if (ino.isMessageAvailable() == true) {
-                    i++;
-                    Double data;
-                    data = Double.parseDouble(ino.printMessage());
-                    int value = (int) Math.round(data);
-                    Serie.add(i, value);
-                }
-            } catch (ArduinoException | SerialPortException ex) {
-                Logger.getLogger(AdminController.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        }
-    };*/
-
     //Serial port gsr
-            /*
     SerialPortEventListener ListenerGSR = new SerialPortEventListener() {
         @Override
         public void serialEvent(SerialPortEvent spe) {
@@ -264,7 +273,36 @@ public class AdminController {
                 Logger.getLogger(AdminController.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
-    };*/
+    };
+
+    /** Listeners de sensores */
+    //Serial port pulso
+    SerialPortEventListener Listener = new SerialPortEventListener() {
+        @Override
+        public void serialEvent(SerialPortEvent spe) {
+            try {
+                if (ino.isMessageAvailable() == true) {
+                    i++;
+                    Double data;
+                    data = Double.parseDouble(ino.printMessage());
+                    int value = (int) Math.round(data);
+                    Serie.add(i, value);
+
+                    if(bandera) {
+                        XYSeries temp = new XYSeries("Punto " + i);
+                        temp.add(i, 1000);
+                        temp.add(i + 5, 50);
+                        markers.add(temp);
+                        //k++;
+                        Coleccion.addSeries(temp);
+                        bandera = false;
+                    }
+                }
+            } catch (ArduinoException | SerialPortException ex) {
+                Logger.getLogger(AdminController.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+    };
 
     public List<Pregunta> getPreguntasList() {
         return preguntasList;
@@ -304,5 +342,13 @@ public class AdminController {
 
     public void setRespuestaLabel(Label respuestaLabel) {
         this.respuestaLabel = respuestaLabel;
+    }
+
+    public boolean isBandera() {
+        return bandera;
+    }
+
+    public void setBandera(boolean bandera) {
+        this.bandera = bandera;
     }
 }

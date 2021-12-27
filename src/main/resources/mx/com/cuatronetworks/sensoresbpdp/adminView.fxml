@@ -54,7 +54,7 @@
                                     <Font size="20.0" />
                                  </font>
                               </Label>
-                              <CheckBox fx:id="verdaderoFalso" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Verdadero/Falso" wrapText="true" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                              <CheckBox fx:id="verdaderoFalso" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Verdadero/Falso" wrapText="true" GridPane.columnSpan="2" GridPane.rowIndex="1">
                                  <font>
                                     <Font size="22.0" />
                                  </font>

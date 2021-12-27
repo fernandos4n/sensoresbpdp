@@ -17,6 +17,8 @@ module mx.com.cuatronetworks.sensoresbpdp {
     requires java.sql;
     requires jfreechart;
     requires jfreechart.fx;
+    requires PanamaHitek.Arduino;
+    requires jssc;
 
     opens mx.com.cuatronetworks.sensoresbpdp to javafx.fxml;
     exports mx.com.cuatronetworks.sensoresbpdp;
