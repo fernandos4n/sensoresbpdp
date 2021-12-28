@@ -1,24 +1,13 @@
 package mx.com.cuatronetworks.sensoresbpdp;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import javax.swing.Timer;
 
 import com.amazonaws.services.polly.model.OutputFormat;
-import com.opencsv.CSVReader;
-import com.opencsv.bean.CsvToBeanBuilder;
-import com.opencsv.exceptions.CsvException;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
-import javafx.stage.Stage;
 import javazoom.jl.player.advanced.AdvancedPlayer;
 import javazoom.jl.player.advanced.PlaybackEvent;
 import javazoom.jl.player.advanced.PlaybackListener;
@@ -70,8 +59,6 @@ public class PrimaryController {
 
 	Timer timer;
 	TextToSpeech customPolly = null;
-	int score = 0;
-    int count = 0;
     int totalPreguntas = 0;
     int intQuestion = 0;
     int modulo = 0;
@@ -81,7 +68,6 @@ public class PrimaryController {
     Integer minutos = 0, segundos = 0, milesimas = 0;
     Integer segundosxpregunta = 5;
     String min = "", seg = "", mil = "";
-    int cadaTiempo = 5;
     String tiempoInicio = "";
     String tiempoFinal = "";
 
@@ -143,7 +129,7 @@ public class PrimaryController {
             }
             //Se inseta el formato Tiempo : 00 : 00 : 00
             //tiempoLabel.setText("Tiempo : " + min + ":" + seg + ":" + mil);
-            System.out.println("Tiempo : " + min + ":" + seg + ":" + mil);
+            //System.out.println("Tiempo : " + min + ":" + seg + ":" + mil);
             // count = count + 1;
             if (segundosxpregunta == 5) {
                 segundosxpregunta = 0;
@@ -203,64 +189,38 @@ public class PrimaryController {
     }
 
     /**
-     * Función de prueba para cambiar a una pantalla adicional
-     * @throws IOException
-     */
-    @FXML
-    private void switchToSecondary() throws IOException {
-        HelloApplication.setRoot("secondary");
-    }
-
-    /**
      * Función que se desencadena al hacer clic en el botón SI
-     * @throws IOException
      */
     @FXML
-    private void contestaSi() throws IOException{
+    private void contestaSi() {
         enviarMarca(intQuestion+1, botonSi.getText());
         contesto = true;
         String pregunta=preguntasList.get(intQuestion).getRespuesta_esperada();
         tiempoFinal = min + ":" + seg + ":" + mil;
         Respuesta respuesta = new Respuesta();
-        if (pregunta.equals("si") || preguntasList.get(intQuestion).getRespuesta_esperada().equals("si")) {
-            respuesta.setCorrecto(1);
-            respuesta.setPregunta(intQuestion);
-            respuesta.setRespuesta(1);
-            System.out.println(preguntasList.get(intQuestion).getReactivo() + " RE: " + preguntasList.get(intQuestion).getRespuesta_esperada() + " R: " + " si" + " Tiempo inicio : " + tiempoInicio + " Tiempo final : " + tiempoFinal);
-        } else {
-            respuesta.setCorrecto(0);
-            respuesta.setPregunta(intQuestion);
-            respuesta.setRespuesta(1);
-            System.out.println(preguntasList.get(intQuestion).getReactivo() + " RE: " + preguntasList.get(intQuestion).getRespuesta_esperada() + " R: " + " si" + " Tiempo inicio : " + tiempoInicio + " Tiempo final : " + tiempoFinal);
-        }
+        respuesta.setCorrecto(pregunta.equals("si") || preguntasList.get(intQuestion).getRespuesta_esperada().equals("si")?1:0);
+        respuesta.setPregunta(intQuestion);
+        respuesta.setRespuesta(1);
+        System.out.println(preguntasList.get(intQuestion).getReactivo() + " RE: " + preguntasList.get(intQuestion).getRespuesta_esperada() + " R: " + " si" + " Tiempo inicio : " + tiempoInicio + " Tiempo final : " + tiempoFinal);
         respuestasList.add(respuesta);
-        //intQuestion++;
         segundosxpregunta = 5;
-        //enviarMarca()
     }
 
     /**
      * Función que se desencadena al hacer clic en el botón NO
-     * @throws IOException
      */
     @FXML
-    private void contestoNo() throws IOException{
+    private void contestoNo() {
         enviarMarca(intQuestion+1, botonNo.getText());
         contesto = true;
         String pregunta=preguntasList.get(intQuestion).getReactivo();
         tiempoFinal = min + ":" + seg + ":" + mil;
         Respuesta respuesta = new Respuesta();
-        if (preguntasList.get(intQuestion).getRespuesta_esperada() == "no" || preguntasList.get(intQuestion).getRespuesta_esperada().equals("no")) {
-            respuesta.setCorrecto(1);
-            respuesta.setPregunta(intQuestion);
-            respuesta.setRespuesta(0);
-            System.out.println(pregunta + " RE: " + preguntasList.get(intQuestion).getRespuesta_esperada() + " R: " + " no" + " Tiempo inicio : " + tiempoInicio + " Tiempo final : " + tiempoFinal);
-        } else {
-            respuesta.setCorrecto(0);
-            respuesta.setPregunta(intQuestion);
-            respuesta.setRespuesta(0);
-            System.out.println(pregunta + " RE: " + preguntasList.get(intQuestion).getRespuesta_esperada() + " R: " + " no" + " Tiempo inicio : " + tiempoInicio + " Tiempo final : " + tiempoFinal);
-        }
+        // TODO: El verdadero y falso
+        respuesta.setCorrecto(preguntasList.get(intQuestion).getRespuesta_esperada().equals("no")?1:0);
+        respuesta.setPregunta(intQuestion);
+        respuesta.setRespuesta(0);
+        System.out.println(pregunta + " RE: " + preguntasList.get(intQuestion).getRespuesta_esperada() + " R: " + " no" + " Tiempo inicio : " + tiempoInicio + " Tiempo final : " + tiempoFinal);
         respuestasList.add(respuesta);
         //intQuestion++;
         segundosxpregunta = 5;
@@ -268,36 +228,30 @@ public class PrimaryController {
 
     /**
      * Obtiene la pregunta para mostrarla en pantalla y la reproduce
-     * @throws IOException
-     * @throws JavaLayerException
      */
     public void GenerarPreguntas() throws IOException, JavaLayerException {
         System.out.println("Número de pregunta: " + intQuestion+1);
         contesto = false;
         String pregunta=preguntasList.get(intQuestion).getReactivo();
         //String pregunta = "Reproduciendo pregunta " + intQuestion ;
-        Platform.runLater(new Runnable() { 
-            @Override
-            public void run() {
-            	preguntaLabel.setText(pregunta);
-                parentController.getPreguntaLabel().setText(pregunta);
-                if(intQuestion < totalPreguntas){
-                    modulo = intQuestion % 3;
-                    if (modulo == 0) {
-                        preguntaLabel.setStyle("-fx-text-fill: #FF0000");
-                        instruccionLabel.setStyle("-fx-text-fill: #FF0000");
-                        instruccionLabel.setText("Contesta con una mentira");
-                    } else {
-                        preguntaLabel.setStyle("-fx-text-fill: #00FF00");
-                        instruccionLabel.setStyle("-fx-text-fill: #00FF00");
-                        instruccionLabel.setText("Contesta con la verdad");
-                    }
+        Platform.runLater(() -> {
+            preguntaLabel.setText(pregunta);
+            parentController.getPreguntaLabel().setText(pregunta);
+            if(intQuestion < totalPreguntas){
+                modulo = intQuestion % 3;
+                if (modulo == 0) {
+                    preguntaLabel.setStyle("-fx-text-fill: #FF0000");
+                    instruccionLabel.setStyle("-fx-text-fill: #FF0000");
+                    instruccionLabel.setText("Contesta con una mentira");
+                } else {
+                    preguntaLabel.setStyle("-fx-text-fill: #00FF00");
+                    instruccionLabel.setStyle("-fx-text-fill: #00FF00");
+                    instruccionLabel.setText("Contesta con la verdad");
                 }
             }
         });
         
         tiempoInicio = min + ":" + seg + ":" + mil;
-        //barraProgreso.setProgress(1);
         if (intQuestion < totalPreguntas) {
             InputStream speechStream = customPolly.synthesize(pregunta, OutputFormat.Mp3);
             AdvancedPlayer player = new AdvancedPlayer(speechStream,javazoom.jl.player.FactoryRegistry.systemRegistry().createAudioDevice());
@@ -305,28 +259,24 @@ public class PrimaryController {
             player.setPlayBackListener(new PlaybackListener() {
                 @Override
                 public void playbackStarted(PlaybackEvent evt) {
-                    System.out.println("Playback started");
+                    System.out.println("Inicia Reproduccion");
                     botonNo.setDisable(true);
                     botonSi.setDisable(true);
                 }
                 @Override
                 public void playbackFinished(PlaybackEvent evt) {
-                    System.out.println("Playback finished");
+                    System.out.println("Termina Reproduccion");
                     botonNo.setDisable(false);
                     botonSi.setDisable(false);
                 }
             });
             player.play();
-            //customPolly.play(pregunta);
         } else {
-            Platform.runLater(new Runnable() {
-                @Override
-                public void run() {
-                    preguntaLabel.setText("Prueba Finalizada");
-                    parentController.getPreguntaLabel().setText("Prueba Finalizada");
-                    botonSi.setVisible(false);
-                    botonNo.setVisible(false);
-                }
+            Platform.runLater(() -> {
+                preguntaLabel.setText("Prueba Finalizada");
+                parentController.getPreguntaLabel().setText("Prueba Finalizada");
+                botonSi.setVisible(false);
+                botonNo.setVisible(false);
             });
             timer.stop();
         }
@@ -334,8 +284,6 @@ public class PrimaryController {
 
     /**
      * Envía los datos a la pantalla de Administración
-     * @param numPregunta
-     * @param respuesta
      */
     private void enviarMarca(Integer numPregunta, String respuesta){
         Platform.runLater(
@@ -346,6 +294,7 @@ public class PrimaryController {
             }
         );
     }
+
     /** GETTERS & SETTERS */
 
     public AdminController getParentController() {
