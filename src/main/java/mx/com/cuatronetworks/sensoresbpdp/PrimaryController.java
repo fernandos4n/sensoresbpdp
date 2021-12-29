@@ -57,6 +57,8 @@ public class PrimaryController {
 	List<Respuesta> respuestasList = new ArrayList<>();
 	List<Pregunta> preguntasList = new ArrayList<>();
 
+    GraficasMedicion graficas;
+
 	Timer timer;
 	TextToSpeech customPolly = null;
     int totalPreguntas = 0;
@@ -76,11 +78,14 @@ public class PrimaryController {
      */
 	@FXML
 	private void initialize() {
+        // Elementos Gráficos
 		instruccionLabel.setText("Bienvenido");
 		preguntaLabel.setText("Presione INICIAR cuando esté listo");
-        customPolly = new TextToSpeech(Region.getRegion(Regions.US_EAST_1));
         botonNo.setVisible(false);
         botonSi.setVisible(false);
+        // Inicializar amazon Polly
+        customPolly = new TextToSpeech(Region.getRegion(Regions.US_EAST_1));
+        graficas = new GraficasMedicion();
 	}
 
     /**
@@ -291,6 +296,7 @@ public class PrimaryController {
                 parentController.getNumPreguntaLabel().setText(numPregunta.toString());
                 parentController.getRespuestaLabel().setText(respuesta);
                 parentController.setBandera(true);
+                graficas.setBandera(true);
             }
         );
     }

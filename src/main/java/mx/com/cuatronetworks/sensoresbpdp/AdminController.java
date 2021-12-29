@@ -3,6 +3,7 @@ package mx.com.cuatronetworks.sensoresbpdp;
 import com.opencsv.bean.CsvToBeanBuilder;
 import com.panamahitek.ArduinoException;
 import com.panamahitek.PanamaHitek_Arduino;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -11,6 +12,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TabPane;
+import javafx.scene.control.TextField;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.FileChooser;
 import javafx.stage.Screen;
@@ -32,7 +34,7 @@ import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 
-import java.awt.*;
+import java.awt.Color;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -73,6 +75,9 @@ public class AdminController {
     @FXML
     private CheckBox verdaderoFalso;
 
+    @FXML
+    private TextField tiempoLecturaField;
+
     // Sensores
     private final String puertoSerialGSR = "/dev/ttyUSB0";
     private final String puertoSerialPPG = "/dev/ttyACM0";
@@ -86,30 +91,35 @@ public class AdminController {
     // VARIABLES sensor PPG
     final XYSeries SeriePPG = new XYSeries("PPG");
     final XYSeriesCollection ColeccionPPG = new XYSeriesCollection();
+        // Media y varianza (+,-)
     final XYSeries mediaPPG = new XYSeries("Media PPG");
     final XYSeries varianzaPPG_p = new XYSeries("Varianza PPG (+)");
     final XYSeries varianzaPPG_n = new XYSeries("Varianza PPG (-)");
 
-    // create subplot 1...
+    // Create subplot 1
     final XYDataset data1 = null;
     final XYItemRenderer renderer1 = new StandardXYItemRenderer();
     final NumberAxis rangeAxis1 = new NumberAxis("Sensor PPG");
     final XYPlot subplot1 = new XYPlot(ColeccionPPG, null, rangeAxis1, renderer1);
 
-    // VARIABLES sensor GSR;
+    // VARIABLES sensor GSR
     final XYSeries SerieGSR = new XYSeries("GSR");
     final XYSeriesCollection ColeccionGSR = new XYSeriesCollection();
+        // Media y varianza (+,-)
+    final XYSeries mediaGSR = new XYSeries("Media GSR");
+    final XYSeries varianzaGSR_p = new XYSeries("Varianza GSR (+)");
+    final XYSeries varianzaGSR_n = new XYSeries("Varianza GSR (-)");
 
-    // create subplot 2...
+    // create subplot 2
     final XYItemRenderer renderer2 = new StandardXYItemRenderer();
     final NumberAxis rangeAxis2 = new NumberAxis("Sensor GSR");
     final XYPlot subplot2 = new XYPlot(ColeccionGSR, null, rangeAxis2, renderer2);
 
-    // VARIABLES Tobii;
+    // VARIABLES Tobii
     final XYSeries SeriesTobbiEL = new XYSeries("Tobii EL");
     final XYSeries SeriesTobbiER = new XYSeries("Tobii ER");
     final XYSeriesCollection ColeccionEyesTobbi = new XYSeriesCollection();
-    // create subplot 2...
+    // Create subplot 2
     final XYItemRenderer renderer3 = new StandardXYItemRenderer();
     final NumberAxis rangeAxis3 = new NumberAxis("Tobii ");
     final XYPlot subplot3 = new XYPlot(ColeccionEyesTobbi, null, rangeAxis3, renderer3);
@@ -128,6 +138,9 @@ public class AdminController {
     // Markers
     final List<XYSeries> markers = new ArrayList<XYSeries>();
     private boolean bandera = false;
+    private boolean banderaCalculos = false;
+    private Double sumaLecturasPPG;
+    private List<Double> lecturasPPG;
 
     // Preguntas
     private int numPregunta;
@@ -138,9 +151,13 @@ public class AdminController {
 
     // Tiempos
     private int tiempo_calibracion = 60;
-    private int tiempo_lectura = 60;
+    private Integer tiempo_lectura = 60;
     public long ultimoTiempo = 0;
     long date_ini;
+    private Integer segundosLectura = 10;
+    private Double media = 0.0;
+    private Double sumaCuadrados = 0.0;
+    private Double varianza = 0.0;
 
     // Controlador Papá
     HelloApplication mainApp;
@@ -163,6 +180,7 @@ public class AdminController {
 
     // Varios
     int i = 0, j = 0, k = 0, l = 0;
+    int numLecturasPPG = 0;
 
     /* SERIALPORT LISTENERS */
     /**
@@ -177,9 +195,9 @@ public class AdminController {
                     try {
                         data = Double.parseDouble(ino2.printMessage());
                         int value = (int) Math.round(data);
-                        escribirGSR(String.valueOf(value) + ","
+                        /*escribirGSR(String.valueOf(value) + ","
                                 + String.valueOf((new Date()).getTime()) + ","
-                                + contador_preguntas + "," + respuesta);
+                                + contador_preguntas + "," + respuesta);*/
                         SerieGSR.add(i, value);
                     } catch (ArduinoException | NumberFormatException | SerialPortException ex) {
                         System.out.println("Error data: " + ex);
@@ -201,44 +219,67 @@ public class AdminController {
             try {
                 if (ino.isMessageAvailable() == true) {
                     i++;
-                    Double data;
+                    Double data = 0.0;
                     long current_time = (new Date()).getTime();
                     long calculo = (current_time - date_ini) / 1000;
                     if (calculo < tiempo_lectura) {
                         try {
                             data = Double.parseDouble(ino.printMessage());
                             int value = (int) Math.round(data);
-                            if (value > 100) {
-                                escribirPPG(String.valueOf(value) + ","
-                                        + String.valueOf((new Date()).getTime()) + ","
-                                        + contador_preguntas + "," + respuesta);
-                                SeriePPG.add(i, value);
-                                //TODO: Cálculos aki
-                                mediaPPG.add(i, 512);
-                                varianzaPPG_p.add(i, 540);
-                                varianzaPPG_n.add(i, 495);
-                                if(bandera) {
-                                    XYSeries temp = new XYSeries("Punto " + i);
-                                    temp.add(i, 1000);
-                                    temp.add(i + 5, 50);
-                                    markers.add(temp);
-                                    ColeccionPPG.addSeries(temp);
-                                    bandera = false;
+                            /*escribirPPG(String.valueOf(value) + ","
+                                    + String.valueOf((new Date()).getTime()) + ","
+                                    + contador_preguntas + "," + respuesta);*/
+                            SeriePPG.add(i, value);
+                            if(data > 0 && data < 1000) {
+                                numLecturasPPG++;
+                                sumaLecturasPPG += data;
+                                lecturasPPG.add(data);
+                                sumaCuadrados += Math.pow((data - media),2);
+                            }
+                            if(calculo >= segundosLectura){ // Se espera a que pasen los n segundos (o los definidos)
+                                if(calculo%segundosLectura == 0){ // Si es multiplo de n
+                                    if(!banderaCalculos){
+                                        // TODO: Cálculos aki
+                                        // Debe entrar aqui una vez pasados 30 segundos");
+                                        System.out.println("Numero de lecturas: " + numLecturasPPG);
+                                        media = sumaLecturasPPG/numLecturasPPG;
+                                        varianza = sumaCuadrados/numLecturasPPG;
+                                        System.out.println("La media es: " + media + " y la Varianza es: " + varianza);
+                                        sumaCuadrados = 0.0;
+                                        sumaLecturasPPG = 0.0;
+                                        numLecturasPPG = 0;
+                                        lecturasPPG = new ArrayList<>();
+                                        banderaCalculos = true;
+                                    }
+                                }else{
+                                    banderaCalculos = false;
                                 }
+                                mediaPPG.add(i, media);
+                                varianzaPPG_p.add(i, media + varianza);
+                                varianzaPPG_n.add(i, media - varianza);
+                            }
+
+                            if(bandera) {
+                                XYSeries temp = new XYSeries("Punto " + i);
+                                temp.add(i, 1000);
+                                temp.add(i + 5, 50);
+                                markers.add(temp);
+                                ColeccionPPG.addSeries(temp);
+                                bandera = false;
                             }
                         } catch (ArduinoException | NumberFormatException | SerialPortException ex) {
                             System.out.println("Error data: " + ex);
                         }
                     } else {
-                        try {
+                        /*try {
                             csvPPG.close();
                             csvGSR.close();
                             csvET.close();
                             contadorTiempos.close();
-                            System.exit(0);
                         } catch (IOException ex) {
                             System.out.println("Error al cerrar el archivo: " + ex);
-                        }
+                        }*/
+                        System.exit(0);
                     }
                 }
             } catch (ArduinoException | SerialPortException ex) {
@@ -249,27 +290,25 @@ public class AdminController {
 
     @FXML
     private void initialize(){
+        // Elementos de la interfaz gráfica
         nombreCSVLabel.setText("Ninún Archivo CSV seleccionado");
         iniciarButton.setDisable(true);
+        tiempoLecturaField.setText(tiempo_lectura.toString());
         tabPane.getTabs().get(1).setDisable(true);
         tabPane.getTabs().get(2).setDisable(true);
 
-        try {
-            long tiempo = (new Date()).getTime();
+
+        /*try {
             csvGSR = new FileWriter("gsr_" + tiempo + ".csv");
             csvPPG = new FileWriter("ppg_" + tiempo + ".csv");
             csvET = new FileWriter("et_" + tiempo + ".csv");
             contadorTiempos = new FileWriter("tiemposrespuesta_" + tiempo + ".csv");
         } catch (IOException ex) {
             System.out.println("Ocurrió un error al abrir archivos: " + ex);
-        }
-
-        ultimoTiempo = (new Date()).getTime();
-        this.date_ini = (new Date()).getTime();
+        }*/
         rangeAxis1.setRange(rangoInferiorPPG, rangoSuperiorPPG);
         rangeAxis2.setRange(rangoInferiorGSR, rangoSuperiorGSR);
         rangeAxis3.setRange(rangoInferiorET, rangoSuperiorET);
-
         renderer3.setSeriesPaint(1, Color.BLACK);
     }
 
@@ -301,7 +340,6 @@ public class AdminController {
                 nombreCSVLabel.setText(nombreCSVLabel.getText() + "\n" + totalPreguntas + " Reactivos Cargados");
                 iniciarButton.setDisable(false);
                 tabPane.getTabs().get(1).setDisable(false);
-
             }catch (Exception e){
                 e.printStackTrace();
                 nombreCSVLabel.setText("Archivo Inválido!");
@@ -311,14 +349,27 @@ public class AdminController {
 
     /**
      * Inicia la interfaz de las preguntas y las gráficas
-     * @throws IOException
      */
     @FXML
     private void iniciarPreguntas() throws IOException {
+        // Inicializar variables
+        tiempo_lectura = Integer.parseInt(tiempoLecturaField.getText());
+        numLecturasPPG = 0;
+        sumaLecturasPPG = 0.0;
+        sumaCuadrados = 0.0;
+        media = (rangoSuperiorPPG + rangoSuperiorPPG)/2;
+        lecturasPPG = new ArrayList<>();
+        long tiempo = (new Date()).getTime();
+        ultimoTiempo = (new Date()).getTime();
+        this.date_ini = (new Date()).getTime();
+
+        // Elementos Gráficos
         tabPane.getSelectionModel().selectNext();
         iniciarButton.setDisable(true);
         cargaCSVButton.setDisable(true);
+        verdaderoFalso.setDisable(true);
 
+        // Agregar las Series a las Gráficas
         ColeccionPPG.addSeries(SeriePPG);
         ColeccionPPG.addSeries(mediaPPG);
         ColeccionPPG.addSeries(varianzaPPG_n);
@@ -343,10 +394,10 @@ public class AdminController {
 
         ChartViewer viewer = new ChartViewer(Grafica);
         Stage stage2 = new Stage();
+        stage2.setMaximized(true);
         stage2.setScene(new Scene(viewer));
         stage2.setTitle("Gráficas");
-        stage2.setMaximized(true);
-        stage2.show();
+        // stage2.show();
 
         // Carga la segunda ventana
         FXMLLoader loader = new FXMLLoader(getClass().getResource("primary.fxml"));
@@ -361,7 +412,6 @@ public class AdminController {
             preguntas.getBotonNo().setText("Falso");
             preguntas.getBotonSi().setText("Verdadero");
         }
-        verdaderoFalso.setDisable(true);
 
         Stage stage = new Stage();
         stage.setX(pantalla2.getVisualBounds().getMinX());
@@ -370,7 +420,9 @@ public class AdminController {
         stage.setHeight(pantalla2.getVisualBounds().getHeight());
         stage.setScene(new Scene(root));
         stage.setTitle("Preguntas");
-        stage.setMaximized(true);
+        stage.show();
+        //stage.setMaximized(true); // TODO: descomentar
+
         // Manejar el cierre de la ventana
         // Detener el contador
         stage.setOnCloseRequest( event -> {
@@ -381,7 +433,6 @@ public class AdminController {
             verdaderoFalso.setDisable(false);
             tabPane.getSelectionModel().selectFirst();
         });
-        stage.show();
 
         /* HILOS */
 
@@ -409,7 +460,7 @@ public class AdminController {
             }
         };
         t5.run();*/
-
+        /*
         Thread t4 = new Thread() {
             public void run() {
                 while (true) {
@@ -439,16 +490,15 @@ public class AdminController {
                             escribirTiempos(dato);
                         }
                     }
-                    /*
+
                     Scanner keyboard = new Scanner(System.in);
                     System.out.println("Responde: 1 Verdadero, 2 Falso");
                     int lectura = keyboard.nextInt(); //1 sí, 0 no
-                    respuesta = lectura;*/
+                    respuesta = lectura;
                 }
             }
-        };
+        };*/
         //t4.start();
-
         try{
             // TODO: Revisar los puertos correctos
             ino.arduinoRX(puertoSerialPPG, baudingPPG, Listener);
@@ -459,6 +509,8 @@ public class AdminController {
         }catch(SerialPortException ex){
             Logger.getLogger(AdminController.class.getName()).log(Level.SEVERE, null, ex);
         }
+
+
     }
 
     /** ESCRIBIR ARCHIVOS DE SALIDA */
