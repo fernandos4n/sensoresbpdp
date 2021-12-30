@@ -78,6 +78,9 @@ public class AdminController {
     @FXML
     private TextField tiempoLecturaField;
 
+    @FXML
+    private TextField intervaloCorrectasField;
+
     // Sensores
     private final String puertoSerialGSR = "/dev/ttyUSB0";
     private final String puertoSerialPPG = "/dev/ttyACM0";
@@ -294,6 +297,7 @@ public class AdminController {
         nombreCSVLabel.setText("Ninún Archivo CSV seleccionado");
         iniciarButton.setDisable(true);
         tiempoLecturaField.setText(tiempo_lectura.toString());
+        intervaloCorrectasField.setText("3");
         tabPane.getTabs().get(1).setDisable(true);
         tabPane.getTabs().get(2).setDisable(true);
 
@@ -393,10 +397,10 @@ public class AdminController {
         Grafica = new JFreeChart("PPG / GSR", JFreeChart.DEFAULT_TITLE_FONT, plot, true);
 
         ChartViewer viewer = new ChartViewer(Grafica);
-        Stage stage2 = new Stage();
-        stage2.setMaximized(true);
-        stage2.setScene(new Scene(viewer));
-        stage2.setTitle("Gráficas");
+        //Stage stage2 = new Stage();
+        //stage2.setMaximized(true);
+        //stage2.setScene(new Scene(viewer));
+        //stage2.setTitle("Gráficas");
         // stage2.show();
 
         // Carga la segunda ventana
@@ -412,6 +416,7 @@ public class AdminController {
             preguntas.getBotonNo().setText("Falso");
             preguntas.getBotonSi().setText("Verdadero");
         }
+        preguntas.setIntervaloCorrectas(Integer.parseInt(intervaloCorrectasField.getText()));
 
         Stage stage = new Stage();
         stage.setX(pantalla2.getVisualBounds().getMinX());
@@ -421,7 +426,7 @@ public class AdminController {
         stage.setScene(new Scene(root));
         stage.setTitle("Preguntas");
         stage.show();
-        //stage.setMaximized(true); // TODO: descomentar
+        stage.setMaximized(true); // TODO: descomentar
 
         // Manejar el cierre de la ventana
         // Detener el contador
@@ -499,6 +504,7 @@ public class AdminController {
             }
         };*/
         //t4.start();
+        /*
         try{
             // TODO: Revisar los puertos correctos
             ino.arduinoRX(puertoSerialPPG, baudingPPG, Listener);
@@ -509,7 +515,7 @@ public class AdminController {
         }catch(SerialPortException ex){
             Logger.getLogger(AdminController.class.getName()).log(Level.SEVERE, null, ex);
         }
-
+        */
 
     }
 

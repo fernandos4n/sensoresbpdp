@@ -11,6 +11,9 @@ import com.opencsv.bean.CsvBindByPosition;
  * @author david
  */
 public class Pregunta {
+    // CONSTANTES
+    public static final String INSTRUCCION = "Instruccion";
+    public static final String ESPERA = "Espera";
 
    //FSC 2021
    @CsvBindByPosition(position = 0)

@@ -52,6 +52,7 @@ public class PrimaryController {
 
 	/** Controlador de la ventana principal*/
     private AdminController parentController;
+    private int intervaloCorrectas = 0;
 
 	/** Elementos de las preguntas, tiempos y TextToSpeech */
 	List<Respuesta> respuestasList = new ArrayList<>();
@@ -63,7 +64,6 @@ public class PrimaryController {
 	TextToSpeech customPolly = null;
     int totalPreguntas = 0;
     int intQuestion = 0;
-    int modulo = 0;
     double value = 0;
     
     boolean contesto = false;
@@ -85,7 +85,11 @@ public class PrimaryController {
         botonSi.setVisible(false);
         // Inicializar amazon Polly
         customPolly = new TextToSpeech(Region.getRegion(Regions.US_EAST_1));
-        graficas = new GraficasMedicion();
+        Platform.runLater(
+            () -> {
+                graficas = new GraficasMedicion();
+            }
+        );
 	}
 
     /**
@@ -99,22 +103,22 @@ public class PrimaryController {
         this.preguntasList = parentController.getPreguntasList();
         totalPreguntas = preguntasList.size();
         timer = new Timer(5, e -> {
-            //Incrementa de 5 en 5 milisegundos
+            // Incrementa de 5 en 5 milisegundos
             milesimas += 5;
-            //Cuando llega a 1000 = 1 segundo aumenta 1 segundo
-            //y las milesimas de segundo de nuevo a 0
+            // Cuando llega a 1000 = 1 segundo aumenta 1 segundo
+            // y las milesimas de segundo de nuevo a 0
             if (milesimas == 1000) {
                 milesimas = 0;
                 segundos += 1;
-                segundosxpregunta += 1;//segundo para cada pregunta
-                //Si los segundos llegan a 60 entonces aumenta 1 los minutos
-                //y los segundos vuelven a 0
+                segundosxpregunta += 1;// segundo para cada pregunta
+                // Si los segundos llegan a 60 entonces aumenta 1 los minutos
+                // y los segundos vuelven a 0
                 if (segundos == 60) {
                     segundos = 0;
                     minutos++;
                 }
             }
-            //Formato 00:00:000
+            // Formato 00:00:000
             if (minutos < 10) {
                 min = "0" + minutos;
             } else {
@@ -132,9 +136,9 @@ public class PrimaryController {
             } else {
                 mil = milesimas.toString();
             }
-            //Se inseta el formato Tiempo : 00 : 00 : 00
-            //tiempoLabel.setText("Tiempo : " + min + ":" + seg + ":" + mil);
-            //System.out.println("Tiempo : " + min + ":" + seg + ":" + mil);
+            // Se inseta el formato Tiempo : 00 : 00 : 00
+            // tiempoLabel.setText("Tiempo : " + min + ":" + seg + ":" + mil);
+            // System.out.println("Tiempo : " + min + ":" + seg + ":" + mil);
             // count = count + 1;
             if (segundosxpregunta == 5) {
                 segundosxpregunta = 0;
@@ -237,30 +241,41 @@ public class PrimaryController {
     public void GenerarPreguntas() throws IOException, JavaLayerException {
         System.out.println("Número de pregunta: " + intQuestion+1);
         contesto = false;
-        String pregunta=preguntasList.get(intQuestion).getReactivo();
-        //String pregunta = "Reproduciendo pregunta " + intQuestion ;
+        Pregunta pregunta = preguntasList.get(intQuestion);
         Platform.runLater(() -> {
-            preguntaLabel.setText(pregunta);
-            parentController.getPreguntaLabel().setText(pregunta);
             if(intQuestion < totalPreguntas){
-                modulo = intQuestion % 3;
-                if (modulo == 0) {
-                    preguntaLabel.setStyle("-fx-text-fill: #FF0000");
-                    instruccionLabel.setStyle("-fx-text-fill: #FF0000");
-                    instruccionLabel.setText("Contesta con una mentira");
-                } else {
-                    preguntaLabel.setStyle("-fx-text-fill: #00FF00");
-                    instruccionLabel.setStyle("-fx-text-fill: #00FF00");
-                    instruccionLabel.setText("Contesta con la verdad");
+                preguntaLabel.setText(pregunta.getReactivo());
+                parentController.getPreguntaLabel().setText(pregunta.getReactivo());
+                // Validar si es instrucción o espera
+                if(pregunta.getTema().equalsIgnoreCase(Pregunta.INSTRUCCION)){
+                    instruccionLabel.setText("");
+                }else if(pregunta.getTema().equalsIgnoreCase(Pregunta.ESPERA)){
+                    instruccionLabel.setText("Instrucción");
+                    // TODO: Hacer la espera
+                }else{
+                    if(intervaloCorrectas != 0){
+                        if (intQuestion % intervaloCorrectas == 0) {
+                            preguntaLabel.setStyle("-fx-text-fill: #FF0000");
+                            instruccionLabel.setStyle("-fx-text-fill: #FF0000");
+                            instruccionLabel.setText("Contesta con una mentira");
+                        } else {
+                            preguntaLabel.setStyle("-fx-text-fill: #00FF00");
+                            instruccionLabel.setStyle("-fx-text-fill: #00FF00");
+                            instruccionLabel.setText("Contesta con la verdad");
+                        }
+                    }else{
+                        preguntaLabel.setStyle("-fx-text-fill: #000000");
+                        instruccionLabel.setStyle("-fx-text-fill: #000000");
+                        instruccionLabel.setText("Responde la siguiente pregunta:");
+                    }
                 }
             }
         });
         
         tiempoInicio = min + ":" + seg + ":" + mil;
         if (intQuestion < totalPreguntas) {
-            InputStream speechStream = customPolly.synthesize(pregunta, OutputFormat.Mp3);
+            InputStream speechStream = customPolly.synthesize(pregunta.getReactivo(), OutputFormat.Mp3);
             AdvancedPlayer player = new AdvancedPlayer(speechStream,javazoom.jl.player.FactoryRegistry.systemRegistry().createAudioDevice());
-
             player.setPlayBackListener(new PlaybackListener() {
                 @Override
                 public void playbackStarted(PlaybackEvent evt) {
@@ -271,8 +286,9 @@ public class PrimaryController {
                 @Override
                 public void playbackFinished(PlaybackEvent evt) {
                     System.out.println("Termina Reproduccion");
-                    botonNo.setDisable(false);
-                    botonSi.setDisable(false);
+                    boolean esPregunta = pregunta.getTema().equalsIgnoreCase(Pregunta.INSTRUCCION) || pregunta.getTema().equalsIgnoreCase(Pregunta.ESPERA);
+                    botonNo.setDisable(esPregunta);
+                    botonSi.setDisable(esPregunta);
                 }
             });
             player.play();
@@ -325,5 +341,13 @@ public class PrimaryController {
 
     public void setBotonNo(Button botonNo) {
         this.botonNo = botonNo;
+    }
+
+    public int getIntervaloCorrectas() {
+        return intervaloCorrectas;
+    }
+
+    public void setIntervaloCorrectas(int intervaloCorrectas) {
+        this.intervaloCorrectas = intervaloCorrectas;
     }
 }

@@ -49,7 +49,7 @@ public class GraficasMedicion extends JFrame {
     private final String puertoSerialPPG = "/dev/ttyUSB0";
     private final String puertoSerialGSR = "/dev/ttyACM0";
     private final int baudingPPG = 115200;
-    private final int baudingGSR = 115200;
+    private final int baudingGSR = 9600;
 
     //VARIABLES sensor PPG
     final XYSeries SeriePPG = new XYSeries("PPG");
@@ -114,6 +114,7 @@ public class GraficasMedicion extends JFrame {
     private Double sumaCuadrados = 0.0;
     private Double varianza = 0.0;
     private int segundos = 0;
+    private int pulsos = 0;
 
     //conexion arduino
     PanamaHitek_Arduino ino = new PanamaHitek_Arduino();
@@ -143,11 +144,13 @@ public class GraficasMedicion extends JFrame {
                                     + String.valueOf((new Date()).getTime()) + ","
                                     + contador_preguntas + "," + respuesta);*/
                             SeriePPG.add(i, value);
-                            if(data > 0 && data < 1000) {
+                            if(data > 500 && data < 1000) {
                                 numLecturasPPG++;
                                 sumaLecturasPPG += data;
                                 lecturasPPG.add(data);
                                 sumaCuadrados += Math.pow((data - media),2);
+                                if(data > varianza)
+                                    pulsos++;
                             }
                             if(calculo >= segundosLectura){ // Se espera a que pasen los n segundos (o los definidos)
                                 if(calculo%segundosLectura == 0){ // Si es multiplo de n
@@ -166,8 +169,10 @@ public class GraficasMedicion extends JFrame {
                                     }
                                     // Aki están los 6 segundos
                                     if(segundos < 6) {
-                                        System.out.println("BPM: " + varianza/2);
+                                        System.out.println("BPM: " + (pulsos/10)*6);
                                         segundos++;
+                                    }else{
+                                        pulsos = 0;
                                     }
                                 }else{
                                     banderaCalculos = false;
@@ -218,6 +223,7 @@ public class GraficasMedicion extends JFrame {
                         data = Double.parseDouble(ino2.printMessage());
                         int value = (int) Math.round(data);
                         SerieGSR.add(i, value);
+                        /*
                         if(j%100 == 0) {
                         	XYSeries temp = new XYSeries("Punto " + j);
                         	temp.add(j, 1000);
@@ -225,6 +231,13 @@ public class GraficasMedicion extends JFrame {
                         	markers.add(temp);
                         	k++;
                         	Coleccion2.addSeries(temp);
+                        }*/
+                        if(bandera) {
+                            XYSeries temp = new XYSeries("Punto " + j);
+                            temp.add(j, 100);
+                            temp.add(j + 5, 50);
+                            markers.add(temp);
+                            Coleccion2.addSeries(temp);
                         }
                     } catch (ArduinoException | NumberFormatException | SerialPortException ex) {
                         System.out.println("Error data: " + ex);
@@ -274,7 +287,7 @@ public class GraficasMedicion extends JFrame {
         plot.setGap(10.0);
 
         //rangeAxis1 = (NumberAxis) subplot1.getDomainAxis();
-        rangeAxis1.setRange(480.0, 550.00);
+        rangeAxis1.setRange(500, 520.00);
         rangeAxis1.setAutoRangeMinimumSize(450);
         // add the subplots...
         subplot1.setRenderer(renderer1);
@@ -297,6 +310,7 @@ public class GraficasMedicion extends JFrame {
         graficos.setBackground(Color.black);
         graficos.pack();
         graficos.setVisible(true);
+        graficos.setExtendedState(this.getExtendedState() | JFrame.MAXIMIZED_BOTH);
         graficos.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     }
 

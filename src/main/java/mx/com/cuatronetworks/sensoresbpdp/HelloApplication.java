@@ -17,6 +17,7 @@ public class HelloApplication extends Application {
         scene = new Scene(fxmlLoader.load(), 640, 480);
         stage.setTitle("Consola de Administración");
         stage.setScene(scene);
+        stage.setAlwaysOnTop(true);
         //stage.setMaximized(true);
         stage.show();
     }
