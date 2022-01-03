@@ -7,15 +7,12 @@ import java.util.List;
 
 import javax.swing.Timer;
 
-import com.amazonaws.services.polly.model.OutputFormat;
+import software.amazon.awssdk.regions.Region;
 import javazoom.jl.player.advanced.AdvancedPlayer;
 import javazoom.jl.player.advanced.PlaybackEvent;
 import javazoom.jl.player.advanced.PlaybackListener;
 import mx.com.cuatronetworks.sensoresbpdp.model.Pregunta;
 import mx.com.cuatronetworks.sensoresbpdp.model.Respuesta;
-
-import com.amazonaws.regions.Region;
-import com.amazonaws.regions.Regions;
 
 import javafx.application.Platform;
 import javafx.fxml.FXML;
@@ -23,6 +20,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 import javazoom.jl.decoder.JavaLayerException;
+import software.amazon.awssdk.services.polly.model.OutputFormat;
 
 /**
  * @author Fernando Sánchez Castro
@@ -84,7 +82,8 @@ public class PrimaryController {
         botonNo.setVisible(false);
         botonSi.setVisible(false);
         // Inicializar amazon Polly
-        customPolly = new TextToSpeech(Region.getRegion(Regions.US_EAST_1));
+        customPolly = new TextToSpeech(Region.US_EAST_1);
+        //Region.US_EAST_1
         Platform.runLater(
             () -> {
                 graficas = new GraficasMedicion();
@@ -137,9 +136,9 @@ public class PrimaryController {
                 mil = milesimas.toString();
             }
             // Se inseta el formato Tiempo : 00 : 00 : 00
-            // tiempoLabel.setText("Tiempo : " + min + ":" + seg + ":" + mil);
-            // System.out.println("Tiempo : " + min + ":" + seg + ":" + mil);
-            // count = count + 1;
+            //tiempoLabel.setText("Tiempo : " + min + ":" + seg + ":" + mil);
+            //System.out.println("Tiempo : " + min + ":" + seg + ":" + mil);
+            //count = count + 1;
             if (segundosxpregunta == 5) {
                 segundosxpregunta = 0;
                 barraProgreso.setProgress(0.001);
@@ -274,7 +273,7 @@ public class PrimaryController {
         
         tiempoInicio = min + ":" + seg + ":" + mil;
         if (intQuestion < totalPreguntas) {
-            InputStream speechStream = customPolly.synthesize(pregunta.getReactivo(), OutputFormat.Mp3);
+            InputStream speechStream = customPolly.synthesize(pregunta.getReactivo(), customPolly.getVoice() ,OutputFormat.MP3);
             AdvancedPlayer player = new AdvancedPlayer(speechStream,javazoom.jl.player.FactoryRegistry.systemRegistry().createAudioDevice());
             player.setPlayBackListener(new PlaybackListener() {
                 @Override

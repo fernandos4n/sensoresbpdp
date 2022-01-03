@@ -10,15 +10,18 @@ module mx.com.cuatronetworks.sensoresbpdp {
     requires org.kordamp.bootstrapfx.core;
     requires jlayer;
     requires java.desktop;
-    requires aws.java.sdk.core;
     requires org.jetbrains.annotations;
-    requires aws.java.sdk.polly;
     requires opencsv;
     requires java.sql;
     requires jfreechart;
     requires jfreechart.fx;
     requires PanamaHitek.Arduino;
     requires jssc;
+    requires software.amazon.awssdk.core;
+    requires software.amazon.awssdk.services.s3;
+    requires software.amazon.awssdk.services.polly;
+    requires software.amazon.awssdk.auth;
+    requires software.amazon.awssdk.regions;
 
     opens mx.com.cuatronetworks.sensoresbpdp to javafx.fxml;
     exports mx.com.cuatronetworks.sensoresbpdp;

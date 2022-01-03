@@ -6,21 +6,17 @@ package mx.com.cuatronetworks.sensoresbpdp;
 
 import java.io.IOException;
 import java.io.InputStream;
- 
-import com.amazonaws.auth.AWSStaticCredentialsProvider;
-import com.amazonaws.auth.BasicAWSCredentials;
-import com.amazonaws.regions.Region;
-import com.amazonaws.services.polly.AmazonPolly;
-import com.amazonaws.services.polly.AmazonPollyClientBuilder;
-import com.amazonaws.services.polly.model.DescribeVoicesRequest;
-import com.amazonaws.services.polly.model.DescribeVoicesResult;
-import com.amazonaws.services.polly.model.OutputFormat;
-import com.amazonaws.services.polly.model.SynthesizeSpeechRequest;
-import com.amazonaws.services.polly.model.SynthesizeSpeechResult;
-import com.amazonaws.services.polly.model.Voice;
+
+import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
+import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
+import software.amazon.awssdk.core.ResponseInputStream;
+import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.polly.PollyClient;
  
 import javazoom.jl.decoder.JavaLayerException;
 import mx.com.cuatronetworks.sensoresbpdp.model.AudioPlayer;
+import software.amazon.awssdk.services.polly.model.*;
+import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 
 /**
  *
@@ -28,19 +24,24 @@ import mx.com.cuatronetworks.sensoresbpdp.model.AudioPlayer;
  */
 public class TextToSpeech {
     
-    private final AmazonPolly polly;
+    private final PollyClient polly;
+
+    AwsCredentialsProvider awsCredentialsProvider;
     
     
     public TextToSpeech(Region region){
-      // create an Amazon Polly client in a specific region
-       // Use your access key id and access secret key
+        // create an Amazon Polly client in a specific region
+        // Use your access key id and access secret key
         // Obtain it from AWS console
         //
-        BasicAWSCredentials awsCredentials = new BasicAWSCredentials("AKIAURYO3RK56DA2WC3I","X2moynxt6jDnJW/t9fkcRGZtso37BHh83dNqIR0J");
+        AwsBasicCredentials awsCredentials = AwsBasicCredentials.create("AKIAURYO3RK56DA2WC3I","X2moynxt6jDnJW/t9fkcRGZtso37BHh83dNqIR0J");
+        awsCredentialsProvider = StaticCredentialsProvider.create(awsCredentials);
+                                //new AWSBasicCredentials("AKIAURYO3RK56DA2WC3I","X2moynxt6jDnJW/t9fkcRGZtso37BHh83dNqIR0J");
         //
         // Create an Amazon Polly client in a specific region
         //
-        this.polly = AmazonPollyClientBuilder.standard().withCredentials(new AWSStaticCredentialsProvider(awsCredentials)).withRegion(region.getName()).build();
+        this.polly = PollyClient.builder().region(Region.US_EAST_1).credentialsProvider(awsCredentialsProvider).build();
+        //this.polly = AmazonPollyClientBuilder.standard().withCredentials(new AWSStaticCredentialsProvider(awsCredentials)).withRegion(region.getName()).build();
    
 
     }
@@ -48,7 +49,8 @@ public class TextToSpeech {
         //
         // Get the audio stream created using the text
         //
-        InputStream speechStream = this.synthesize(text, OutputFormat.Mp3);
+
+        InputStream speechStream = this.synthesize(text, this.getVoice() ,OutputFormat.MP3);
         //
         // Play the audio
         //
@@ -56,12 +58,12 @@ public class TextToSpeech {
     }
  
     @SuppressWarnings("empty-statement")
-    public InputStream synthesize(String text, OutputFormat format) throws IOException {
+    public InputStream synthesize(String text, Voice voice,OutputFormat format) throws IOException {
         //
         // Get the default voice
         //
-        Voice voice = this.getVoice();
-        voice.setId("Lupe");
+        //Voice voice = this.getVoice();
+        //voice.setId("Lupe");
        /* SynthesizeSpeechRequest synthReq = 
 		new SynthesizeSpeechRequest().withText(text).withVoiceId(voice.getId()).withOutputFormat(format).withEngine("neural");
 		SynthesizeSpeechResult synthRes = polly.synthesizeSpeech(synthReq);*/
@@ -71,24 +73,31 @@ public class TextToSpeech {
         // Voice
         // The detail will be used to create the speech
         //
-        SynthesizeSpeechRequest synthReq = new SynthesizeSpeechRequest().withText(text).withVoiceId(voice.getId()).withOutputFormat(format);
+        SynthesizeSpeechRequest synthesizeSpeechRequest = SynthesizeSpeechRequest.builder().text(text).voiceId(voice.id()).outputFormat(format).build();
+        //SynthesizeSpeechRequest synthReq = new SynthesizeSpeechRequest().withText(text).withVoiceId(voice.getId()).withOutputFormat(format);
         //
         // Create the speech
         //
-        SynthesizeSpeechResult synthRes = this.polly.synthesizeSpeech(synthReq);
+        ResponseInputStream<SynthesizeSpeechResponse> synthRes = this.polly.synthesizeSpeech(synthesizeSpeechRequest);
+        return synthRes;
+        //SynthesizeSpeechResult synthRes = this.polly.synthesizeSpeech(synthReq);
         //
         // Returns the audio stream
         //
-        return synthRes.getAudioStream();
+        //return synthRes.getAudioStream();
     }
  
     public Voice getVoice() {
         //
         // Create describe voices request.
         //
+        DescribeVoicesRequest voicesRequest = DescribeVoicesRequest.builder().languageCode("es-MX").build();
+        DescribeVoicesResponse esMxVoicesResult = this.polly.describeVoices(voicesRequest);
+        return esMxVoicesResult.voices().get(0);
+        /*
         DescribeVoicesRequest describeVoicesRequest = new DescribeVoicesRequest();
         // Synchronously ask Amazon Polly to describe available TTS voices.
         DescribeVoicesResult describeVoicesResult = this.polly.describeVoices(describeVoicesRequest);
-        return describeVoicesResult.getVoices().get(0);
+        return describeVoicesResult.getVoices().get(0);*/
     }
 }

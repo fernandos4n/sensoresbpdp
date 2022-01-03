@@ -27,11 +27,17 @@ import org.jfree.chart.renderer.xy.StandardXYItemRenderer;
 import org.jfree.chart.renderer.xy.XYItemRenderer;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
+import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
+import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
+import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
+import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.s3.S3AsyncClient;
+import software.amazon.awssdk.services.s3.S3AsyncClientBuilder;
+import software.amazon.awssdk.services.s3.model.PutObjectRequest;
+
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.File;
-import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import java.util.UUID;
 
 /**
@@ -154,16 +160,24 @@ public class GraficasMedicion extends JFrame {
 
 	private static void subirArchivoS3() throws IOException {
 		File archivoCsv = new File(s3_filename);
-		AWSCredentials credentials = new BasicAWSCredentials("AKIAT6JLQQW37JVK4IFG",
+		AwsBasicCredentials awsBasicCredentials = AwsBasicCredentials.create("AKIAT6JLQQW37JVK4IFG",
 				"c08zfntPoBnF5O0G3dvizMarT/nlGthf9dejfdB8");
+		AwsCredentialsProvider awsCredentialsProvider = StaticCredentialsProvider.create(awsBasicCredentials);
+		/*AWSCredentials credentials = new BasicAWSCredentials("AKIAT6JLQQW37JVK4IFG",
+				"c08zfntPoBnF5O0G3dvizMarT/nlGthf9dejfdB8");*/
+		S3AsyncClient s3AsyncClient = S3AsyncClient.builder().region(Region.US_EAST_1).credentialsProvider(awsCredentialsProvider).build();
+		/*
 		AmazonS3 s3client = AmazonS3ClientBuilder.standard()
 				.withCredentials(new AWSStaticCredentialsProvider(credentials)).withRegion(Regions.US_EAST_2).build();
-
+*/
 		// bucketName : el nombre del depósito donde queremos subir el objeto
 		// clave : esta es la ruta completa al archivo
 		// archivo : el archivo real que contiene los datos que se van a cargar
 		String bucketName = "lecturasppg";
 		String claveBucket = "lecturasppg/" + s3_filename;
+		PutObjectRequest.builder().bucket(bucketName).key(claveBucket).
+		s3AsyncClient.putObject(bucketName, claveBucket, archivoCsv);
+		s3AsyncClient.put
 		s3client.putObject(bucketName, claveBucket, archivoCsv);
 	}
 
