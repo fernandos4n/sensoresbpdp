@@ -52,7 +52,9 @@ public class GraficasMedicion extends JFrame {
 	long date_ini;
 	private int tiempo_calibracion = 10;
 	private int tiempo_lectura = 720;
-	private boolean bandera = false;
+	private boolean banderaPPG = false;
+	private boolean banderaGSR = false;
+	private boolean banderaTOBII = false;
 	/**
 	 * Creates new form Graficos
 	 */
@@ -61,7 +63,7 @@ public class GraficasMedicion extends JFrame {
 	private final String puertoSerialPPG = "/dev/ttyUSB0";
 	private final String puertoSerialGSR = "/dev/ttyACM0";
 	private final int baudingPPG = 115200;
-	private final int baudingGSR = 9600;
+	private final int baudingGSR = 115200;
 
 	// VARIABLES sensor PPG
 	final XYSeries SeriePPG = new XYSeries("PPG");
@@ -125,7 +127,7 @@ public class GraficasMedicion extends JFrame {
 	PanamaHitek_Arduino ino2 = new PanamaHitek_Arduino();
 	final DateAxis timeAxis = new DateAxis("Time");
 	final CombinedDomainXYPlot plot = new CombinedDomainXYPlot(timeAxis);
-	public static int contador_preguntas = 1;
+	private int contador_preguntas = 1;
     public static int respuesta = 0;
     public long ultimoTiempo = 0;
 
@@ -169,7 +171,7 @@ public class GraficasMedicion extends JFrame {
 		/*
 		AmazonS3 s3client = AmazonS3ClientBuilder.standard()
 				.withCredentials(new AWSStaticCredentialsProvider(credentials)).withRegion(Regions.US_EAST_2).build();
-*/
+
 		// bucketName : el nombre del depósito donde queremos subir el objeto
 		// clave : esta es la ruta completa al archivo
 		// archivo : el archivo real que contiene los datos que se van a cargar
@@ -178,7 +180,7 @@ public class GraficasMedicion extends JFrame {
 		PutObjectRequest.builder().bucket(bucketName).key(claveBucket).
 		s3AsyncClient.putObject(bucketName, claveBucket, archivoCsv);
 		s3AsyncClient.put
-		s3client.putObject(bucketName, claveBucket, archivoCsv);
+		s3client.putObject(bucketName, claveBucket, archivoCsv);*/
 	}
 
 	/**
@@ -240,18 +242,18 @@ public class GraficasMedicion extends JFrame {
 									banderaCalculos = false;
 									segundos = 0;
 								}
-								mediaPPG.add(i, media);
-								varianzaPPG_p.add(i, media + varianza);
-								varianzaPPG_n.add(i, media - varianza);
+								mediaPPG.add(time, media);
+								varianzaPPG_p.add(time, media + varianza);
+								varianzaPPG_n.add(time, media - varianza);
 							}
 
-							if (bandera) {
-								XYSeries temp = new XYSeries("Pregunta " + i);
+							if (banderaPPG) {
+								XYSeries temp = new XYSeries(contador_preguntas);
 								temp.add(time, 1000);
 								temp.add(time + 5, 50);
 								markers.add(temp);
 								Coleccion.addSeries(temp);
-								bandera = false;
+								banderaPPG = false;
 							}
 						} catch (ArduinoException | NumberFormatException | SerialPortException ex) {
 							System.out.println("Error data: " + ex);
@@ -294,12 +296,13 @@ public class GraficasMedicion extends JFrame {
 						 * 1000); temp.add(j+1, 50); markers.add(temp); k++; Coleccion2.addSeries(temp);
 						 * }
 						 */
-						if (bandera) {
-							XYSeries temp = new XYSeries("Punto " + j);
-							temp.add(time, 100);
-							temp.add(time + 5, 50);
+						if (banderaGSR) {
+							XYSeries temp = new XYSeries(contador_preguntas);
+							temp.add(time, 550);
+							temp.add(time + 5, 0);
 							markers.add(temp);
 							Coleccion2.addSeries(temp);
+							banderaGSR = false;
 						}
 					} catch (ArduinoException | NumberFormatException | SerialPortException ex) {
 						System.out.println("Error data: " + ex);
@@ -484,11 +487,17 @@ public class GraficasMedicion extends JFrame {
 	// Variables declaration - do not modify//GEN-BEGIN:variables
 	// End of variables declaration//GEN-END:variables
 
-	public boolean isBandera() {
-		return bandera;
+	public void setBanderas(boolean val){
+		banderaGSR = val;
+		banderaPPG = val;
+		banderaTOBII = val;
 	}
 
-	public void setBandera(boolean bandera) {
-		this.bandera = bandera;
+	public int getContador_preguntas() {
+		return contador_preguntas;
+	}
+
+	public void setContador_preguntas(int contador_preguntas) {
+		this.contador_preguntas = contador_preguntas;
 	}
 }

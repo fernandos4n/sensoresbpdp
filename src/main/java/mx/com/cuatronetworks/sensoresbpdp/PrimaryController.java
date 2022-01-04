@@ -66,7 +66,8 @@ public class PrimaryController {
     
     boolean contesto = false;
     Integer minutos = 0, segundos = 0, milesimas = 0;
-    Integer segundosxpregunta = 5;
+    private int tiempoEspera = 7;
+    Integer segundosxpregunta = tiempoEspera;
     String min = "", seg = "", mil = "";
     String tiempoInicio = "";
     String tiempoFinal = "";
@@ -139,7 +140,7 @@ public class PrimaryController {
             //tiempoLabel.setText("Tiempo : " + min + ":" + seg + ":" + mil);
             //System.out.println("Tiempo : " + min + ":" + seg + ":" + mil);
             //count = count + 1;
-            if (segundosxpregunta == 5) {
+            if (segundosxpregunta == tiempoEspera) {
                 segundosxpregunta = 0;
                 barraProgreso.setProgress(0.001);
                 System.out.println("Tiempo inicial: " + barraProgreso.getProgress());
@@ -157,7 +158,7 @@ public class PrimaryController {
                     System.out.println(preguntasList.get(intQuestion).getReactivo() + " RE: " + preguntasList.get(intQuestion).getRespuesta_esperada() + " R: " + " null" + " Tiempo inicio : " + tiempoInicio + " Tiempo final : " + tiempoFinal);
                     intQuestion++;
                 }
-                if (!contesto && intQuestion == 0 && segundos == 5) {
+                if (!contesto && intQuestion == 0 && segundos == tiempoEspera) {
                     System.out.println("No contesto false pregunta 0");
                     Respuesta respuesta = new Respuesta();
                     respuesta.setCorrecto(0);
@@ -169,7 +170,7 @@ public class PrimaryController {
                     intQuestion++;
                 }
 
-                if (!contesto && intQuestion != 0 && segundos > 5) {
+                if (!contesto && intQuestion != 0 && segundos > tiempoEspera) {
                     System.out.println("No contesto false pregunta !=0 ");
                     Respuesta respuesta = new Respuesta();
                     respuesta.setCorrecto(0);
@@ -186,7 +187,7 @@ public class PrimaryController {
                     ex.printStackTrace();
                 }
             }
-            value = segundosxpregunta * .25;
+            value = segundosxpregunta * .14;
             barraProgreso.setProgress(value);
             if (minutos == 12) {
                 ((Timer) (e.getSource())).stop();
@@ -211,7 +212,7 @@ public class PrimaryController {
         respuesta.setRespuesta(1);
         System.out.println(preguntasList.get(intQuestion).getReactivo() + " RE: " + preguntasList.get(intQuestion).getRespuesta_esperada() + " R: " + " si" + " Tiempo inicio : " + tiempoInicio + " Tiempo final : " + tiempoFinal);
         respuestasList.add(respuesta);
-        segundosxpregunta = 5;
+        segundosxpregunta = tiempoEspera;
     }
 
     /**
@@ -231,7 +232,7 @@ public class PrimaryController {
         System.out.println(pregunta + " RE: " + preguntasList.get(intQuestion).getRespuesta_esperada() + " R: " + " no" + " Tiempo inicio : " + tiempoInicio + " Tiempo final : " + tiempoFinal);
         respuestasList.add(respuesta);
         //intQuestion++;
-        segundosxpregunta = 5;
+        segundosxpregunta = tiempoEspera;
     }
 
     /**
@@ -311,7 +312,8 @@ public class PrimaryController {
                 parentController.getNumPreguntaLabel().setText(numPregunta.toString());
                 parentController.getRespuestaLabel().setText(respuesta);
                 parentController.setBandera(true);
-                graficas.setBandera(true);
+                graficas.setBanderas(true);
+                graficas.setContador_preguntas(numPregunta);
             }
         );
     }
