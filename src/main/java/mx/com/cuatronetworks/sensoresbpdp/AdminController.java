@@ -340,6 +340,10 @@ public class AdminController {
                         .withType(Pregunta.class).withSkipLines(1)
                         .build()
                         .parse();
+                System.out.println("PREGUNTAS\n");
+                for (Pregunta p : preguntasList) {
+                	System.out.println(p);
+                }
                 totalPreguntas = preguntasList.size();
                 nombreCSVLabel.setText(nombreCSVLabel.getText() + "\n" + totalPreguntas + " Reactivos Cargados");
                 iniciarButton.setDisable(false);
@@ -406,6 +410,7 @@ public class AdminController {
         // Carga la segunda ventana
         FXMLLoader loader = new FXMLLoader(getClass().getResource("primary.fxml"));
         // Si tenemos la segunda pantalla
+        // TODO: Cambiar a pantalla 1
         Screen pantalla2 = Screen.getScreens().size()>1?Screen.getScreens().get(1):Screen.getPrimary();
         Parent root = loader.load();
         PrimaryController preguntas = loader.getController();
@@ -419,10 +424,11 @@ public class AdminController {
         preguntas.setIntervaloCorrectas(Integer.parseInt(intervaloCorrectasField.getText()));
 
         Stage stage = new Stage();
+        /*
         stage.setX(pantalla2.getVisualBounds().getMinX());
         stage.setY(pantalla2.getVisualBounds().getMinY());
         stage.setWidth(pantalla2.getVisualBounds().getWidth());
-        stage.setHeight(pantalla2.getVisualBounds().getHeight());
+        stage.setHeight(pantalla2.getVisualBounds().getHeight());*/
         stage.setScene(new Scene(root));
         stage.setTitle("Preguntas");
         stage.show();

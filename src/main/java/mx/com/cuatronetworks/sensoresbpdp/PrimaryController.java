@@ -72,6 +72,8 @@ public class PrimaryController {
     String min = "", seg = "", mil = "";
     String tiempoInicio = "";
     String tiempoFinal = "";
+    
+    boolean isPreguntando = false;
 
     /**
      * Función que se ejecuta al inicializar la interfaz gráfica
@@ -91,6 +93,8 @@ public class PrimaryController {
             }
         );
 	}
+	
+	List<Integer> preguntasRespondidas = new ArrayList<>();
 
     /**
      * Inicia las preguntas
@@ -155,7 +159,7 @@ public class PrimaryController {
                     respuesta.setRespuesta(2);
                     respuestasList.add(respuesta);
                     tiempoFinal = min + ":" + seg + ":" + mil;
-                    System.out.println(preguntasList.get(intQuestion).getReactivo() + " RE: " + preguntasList.get(intQuestion).getRespuesta_esperada() + " R: " + " null" + " Tiempo inicio : " + tiempoInicio + " Tiempo final : " + tiempoFinal);
+                    System.out.println("###" + intQuestion + " " + preguntasList.get(intQuestion).getReactivo() + " RE: " + preguntasList.get(intQuestion).getRespuesta_esperada() + " R: " + " null" + " Tiempo inicio : " + tiempoInicio + " Tiempo final : " + tiempoFinal);
                     intQuestion++;
                 }
                 if (!contesto && intQuestion == 0 && segundos == 5) {
@@ -166,7 +170,7 @@ public class PrimaryController {
                     respuesta.setRespuesta(2);
                     respuestasList.add(respuesta);
                     tiempoFinal = min + ":" + seg + ":" + mil;
-                    System.out.println(preguntasList.get(intQuestion).getReactivo() + " RE: " + preguntasList.get(intQuestion).getRespuesta_esperada() + " R: " + " null" + " Tiempo inicio : " + tiempoInicio + " Tiempo final : " + tiempoFinal);
+                    System.out.println("###" + intQuestion + " " + preguntasList.get(intQuestion).getReactivo() + " RE: " + preguntasList.get(intQuestion).getRespuesta_esperada() + " R: " + " null" + " Tiempo inicio : " + tiempoInicio + " Tiempo final : " + tiempoFinal);
                     intQuestion++;
                 }
 
@@ -178,7 +182,7 @@ public class PrimaryController {
                     respuesta.setRespuesta(2);
                     respuestasList.add(respuesta);
                     tiempoFinal = min + ":" + seg + ":" + mil;
-                    System.out.println(preguntasList.get(intQuestion).getReactivo() + " RE: " + preguntasList.get(intQuestion).getRespuesta_esperada() + " R: " + " null" + " Tiempo inicio : " + tiempoInicio + " Tiempo final : " + tiempoFinal);
+                    System.out.println("###" + intQuestion + " " + preguntasList.get(intQuestion).getReactivo() + " RE: " + preguntasList.get(intQuestion).getRespuesta_esperada() + " R: " + " null" + " Tiempo inicio : " + tiempoInicio + " Tiempo final : " + tiempoFinal);
                     intQuestion++;
                 }
                 try {
@@ -202,6 +206,7 @@ public class PrimaryController {
      */
     @FXML
     private void contestaSi() {
+    	preguntasRespondidas.add(intQuestion - 3);
         enviarMarca(intQuestion+1, botonSi.getText());
         contesto = true;
         String pregunta=preguntasList.get(intQuestion).getRespuesta_esperada();
@@ -213,6 +218,10 @@ public class PrimaryController {
         System.out.println(preguntasList.get(intQuestion).getReactivo() + " RE: " + preguntasList.get(intQuestion).getRespuesta_esperada() + " R: " + " si" + " Tiempo inicio : " + tiempoInicio + " Tiempo final : " + tiempoFinal);
         respuestasList.add(respuesta);
         segundosxpregunta = 5;
+        String preguntasRespondidasCadena = "Respondidas: ";
+    	for (int respondida : preguntasRespondidas) {
+    		preguntasRespondidasCadena += respondida + " ";
+    	}
     }
 
     /**
@@ -220,6 +229,7 @@ public class PrimaryController {
      */
     @FXML
     private void contestoNo() {
+    	preguntasRespondidas.add(intQuestion - 3);
         enviarMarca(intQuestion+1, botonNo.getText());
         contesto = true;
         String pregunta=preguntasList.get(intQuestion).getReactivo();
@@ -233,6 +243,10 @@ public class PrimaryController {
         respuestasList.add(respuesta);
         //intQuestion++;
         segundosxpregunta = 5;
+        String preguntasRespondidasCadena = "Respondidas: ";
+    	for (int respondida : preguntasRespondidas) {
+    		preguntasRespondidasCadena += respondida + " ";
+    	}
     }
 
     /**
@@ -286,9 +300,15 @@ public class PrimaryController {
                 @Override
                 public void playbackFinished(PlaybackEvent evt) {
                     System.out.println("Termina Reproduccion");
-                    boolean esPregunta = pregunta.getTema().equalsIgnoreCase(Pregunta.INSTRUCCION) || pregunta.getTema().equalsIgnoreCase(Pregunta.ESPERA);
-                    botonNo.setDisable(esPregunta);
-                    botonSi.setDisable(esPregunta);
+                    boolean noPregunta = pregunta.getTema().equalsIgnoreCase(Pregunta.INSTRUCCION) || pregunta.getTema().equalsIgnoreCase(Pregunta.ESPERA);
+                    botonNo.setVisible(!noPregunta);
+                    botonSi.setVisible(!noPregunta);
+                    botonSi.setDisable(noPregunta);
+                    botonNo.setDisable(noPregunta);
+                    if(!noPregunta && !isPreguntando){
+                        isPreguntando = true;
+                        enviarBandera(isPreguntando);
+                    }
                 }
             });
             player.play();
@@ -313,7 +333,16 @@ public class PrimaryController {
                 parentController.getRespuestaLabel().setText(respuesta);
                 parentController.setBandera(true);
                 graficas.setBandera(true);
+                graficas.setContador_pregunta(numPregunta);
             }
+        );
+    }
+    
+    private void enviarBandera(boolean preguntando){
+        Platform.runLater(
+                () -> {
+                    graficas.setBanderaInicio(preguntando);
+                }
         );
     }
 

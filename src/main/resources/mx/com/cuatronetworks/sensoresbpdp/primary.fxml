@@ -28,7 +28,7 @@
             <RowConstraints percentHeight="10.0" vgrow="SOMETIMES" />
         </rowConstraints>
          <children>
-            <Label fx:id="preguntaLabel" alignment="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" textAlignment="CENTER" wrapText="true" GridPane.columnIndex="1" GridPane.columnSpan="3" GridPane.rowIndex="1">
+            <Label fx:id="preguntaLabel" alignment="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" textAlignment="CENTER" wrapText="true" GridPane.columnIndex="1" GridPane.columnSpan="3" GridPane.rowIndex="1" GridPane.rowSpan="2">
                <font>
                   <Font name="Ubuntu" size="38.0" />
                </font></Label>
