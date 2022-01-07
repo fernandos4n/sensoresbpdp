@@ -409,7 +409,7 @@ public class GraficasMedicion extends JFrame {
 		media = 512.0;
 		lecturasPPG = new ArrayList<>();
 		// initComponents();
-		this.date_ini = (new Date()).getTime();
+		//this.date_ini = (new Date()).getTime();
 		System.out.println("TS: " + date_ini);
 		initComponents();
 		/*
