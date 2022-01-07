@@ -3,10 +3,14 @@ package mx.com.cuatronetworks.sensoresbpdp;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
-import javax.swing.Timer;
+import javax.swing.*;
 
+import org.knowm.xchart.QuickChart;
+import org.knowm.xchart.SwingWrapper;
+import org.knowm.xchart.XYChart;
 import software.amazon.awssdk.regions.Region;
 import javazoom.jl.player.advanced.AdvancedPlayer;
 import javazoom.jl.player.advanced.PlaybackEvent;
@@ -57,6 +61,7 @@ public class PrimaryController {
 	List<Pregunta> preguntasList = new ArrayList<>();
 
     GraficasMedicion graficas;
+    SwingWorkerRealTime graficas2;
 
 	Timer timer;
 	TextToSpeech customPolly = null;
@@ -72,6 +77,12 @@ public class PrimaryController {
     String tiempoInicio = "";
     String tiempoFinal = "";
 
+    boolean isPreguntando = false;
+
+    MySwingWorker mySwingWorker;
+    SwingWrapper<XYChart> sw;
+    XYChart chart;
+
     /**
      * Función que se ejecuta al inicializar la interfaz gráfica
      */
@@ -85,9 +96,11 @@ public class PrimaryController {
         // Inicializar amazon Polly
         customPolly = new TextToSpeech(Region.US_EAST_1);
         //Region.US_EAST_1
+        graficas2 = new SwingWorkerRealTime();
         Platform.runLater(
             () -> {
-                graficas = new GraficasMedicion();
+                //graficas = new GraficasMedicion();
+
             }
         );
 	}
@@ -100,6 +113,7 @@ public class PrimaryController {
         botonIniciar.setVisible(false);
         botonNo.setVisible(true);
         botonSi.setVisible(true);
+        //this.go();
         this.preguntasList = parentController.getPreguntasList();
         totalPreguntas = preguntasList.size();
         timer = new Timer(5, e -> {
@@ -197,6 +211,21 @@ public class PrimaryController {
         timer.start();
     }
 
+    private void go() {
+
+        // Create Chart
+        chart = QuickChart.getChart("SwingWorker XChart Real-time Demo", "Time", "Value", "randomWalk", new double[] { 0 }, new double[] { 0 });
+        chart.getStyler().setLegendVisible(false);
+        chart.getStyler().setXAxisTicksVisible(false);
+
+        // Show it
+        sw = new SwingWrapper<XYChart>(chart);
+        sw.displayChart();
+
+        mySwingWorker = new MySwingWorker();
+        mySwingWorker.execute();
+    }
+
     /**
      * Función que se desencadena al hacer clic en el botón SI
      */
@@ -286,12 +315,25 @@ public class PrimaryController {
                 @Override
                 public void playbackFinished(PlaybackEvent evt) {
                     System.out.println("Termina Reproduccion");
-                    boolean esPregunta = pregunta.getTema().equalsIgnoreCase(Pregunta.INSTRUCCION) || pregunta.getTema().equalsIgnoreCase(Pregunta.ESPERA);
-                    botonNo.setDisable(esPregunta);
-                    botonSi.setDisable(esPregunta);
+                    boolean noPregunta = pregunta.getTema().equalsIgnoreCase(Pregunta.INSTRUCCION) || pregunta.getTema().equalsIgnoreCase(Pregunta.ESPERA);
+                    botonNo.setVisible(!noPregunta);
+                    botonSi.setVisible(!noPregunta);
+                    botonSi.setDisable(noPregunta);
+                    botonNo.setDisable(noPregunta);
+                    if(!noPregunta && !isPreguntando){
+                        isPreguntando = true;
+                        enviarBandera(isPreguntando);
+                    }
                 }
             });
-            player.play();
+            Platform.runLater(() -> {
+                try { // TODO: revisar bien esto ggg
+                    player.play();
+                } catch (JavaLayerException e) {
+                    e.printStackTrace();
+                }
+            });
+
         } else {
             Platform.runLater(() -> {
                 preguntaLabel.setText("Prueba Finalizada");
@@ -316,6 +358,75 @@ public class PrimaryController {
                 graficas.setContador_preguntas(numPregunta);
             }
         );
+    }
+
+    private void enviarBandera(boolean preguntando){
+        Platform.runLater(
+                () -> {
+                    System.out.println("Se envió la bandera xd");
+                    //graficas.setBandera(preguntando);
+                }
+        );
+    }
+
+    private class MySwingWorker extends SwingWorker<Boolean, double[]> {
+
+        LinkedList<Double> fifo = new LinkedList<Double>();
+
+        public MySwingWorker() {
+
+            fifo.add(0.0);
+        }
+
+
+
+        @Override
+        protected Boolean doInBackground() throws Exception {
+
+            while (!isCancelled()) {
+
+                fifo.add(fifo.get(fifo.size() - 1) + Math.random() - .5);
+                if (fifo.size() > 500) {
+                    fifo.removeFirst();
+                }
+
+                double[] array = new double[fifo.size()];
+                for (int i = 0; i < fifo.size(); i++) {
+                    array[i] = fifo.get(i);
+                }
+                publish(array);
+
+                try {
+                    Thread.sleep(5);
+                } catch (InterruptedException e) {
+                    // eat it. caught when interrupt is called
+                    System.out.println("MySwingWorker shut down.");
+                }
+
+            }
+
+            return true;
+        }
+
+        @Override
+        protected void process(List<double[]> chunks) {
+
+            System.out.println("number of chunks: " + chunks.size());
+
+            double[] mostRecentDataSet = chunks.get(chunks.size() - 1);
+
+            chart.updateXYSeries("randomWalk", null, mostRecentDataSet, null);
+            sw.repaintChart();
+
+            long start = System.currentTimeMillis();
+            long duration = System.currentTimeMillis() - start;
+            try {
+                Thread.sleep(40 - duration); // 40 ms ==> 25fps
+                // Thread.sleep(400 - duration); // 40 ms ==> 2.5fps
+            } catch (InterruptedException e) {
+            }
+
+        }
     }
 
     /** GETTERS & SETTERS */

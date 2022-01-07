@@ -18,7 +18,7 @@ public class HelloApplication extends Application {
         stage.setTitle("Consola de Administración");
         stage.setScene(scene);
         stage.setAlwaysOnTop(true);
-        //stage.setMaximized(true);
+        stage.setMaximized(true);
         stage.show();
     }
 

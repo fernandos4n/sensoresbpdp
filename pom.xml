@@ -162,6 +162,12 @@
 			<groupId>software.amazon.awssdk</groupId>
 			<artifactId>polly</artifactId>
 		</dependency>
+		<!-- https://mvnrepository.com/artifact/org.knowm.xchart/xchart -->
+		<dependency>
+			<groupId>org.knowm.xchart</groupId>
+			<artifactId>xchart</artifactId>
+			<version>3.8.1</version>
+		</dependency>
 
 	</dependencies>
 

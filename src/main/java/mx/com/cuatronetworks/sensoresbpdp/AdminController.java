@@ -8,9 +8,12 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.chart.LineChart;
+import javafx.scene.chart.XYChart;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
+import javafx.scene.chart.NumberAxis;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.AnchorPane;
@@ -23,7 +26,6 @@ import jssc.SerialPortException;
 import mx.com.cuatronetworks.sensoresbpdp.model.Pregunta;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.DateAxis;
-import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.fx.ChartViewer;
 import org.jfree.chart.plot.CombinedDomainXYPlot;
 import org.jfree.chart.plot.PlotOrientation;
@@ -67,6 +69,9 @@ public class AdminController {
     private Button iniciarButton;
 
     @FXML
+    private Button salirButton;
+
+    @FXML
     private AnchorPane anchorPane;
 
     @FXML
@@ -81,62 +86,42 @@ public class AdminController {
     @FXML
     private TextField intervaloCorrectasField;
 
-    // Sensores
-    private final String puertoSerialGSR = "/dev/ttyUSB0";
-    private final String puertoSerialPPG = "/dev/ttyACM0";
+    @FXML
+    private NumberAxis xAxisPPG;
+
+    @FXML
+    private NumberAxis yAxisPPG;
+
+    @FXML
+    private LineChart<Number, Number> graficaPPG;
+
+    @FXML
+    private NumberAxis xAxisGSR;
+
+    @FXML
+    private NumberAxis yAxisGSR;
+
+    @FXML
+    private LineChart<Number, Number> graficaGSR;
+
+    @FXML
+    private NumberAxis xAxisTOBII;
+
+    @FXML
+    private NumberAxis yAxisTOBII;
+
+    @FXML
+    private LineChart<Number, Number> graficaTOBII;
+
+    // Puertos y Bauding
+    private final String puertoSerialGSR = "/dev/ttyACM0";
+    private final String puertoSerialPPG = "/dev/ttyUSB0";
     private final int baudingPPG = 115200;
     private final int baudingGSR = 115200;
 
     // Arduino
-    PanamaHitek_Arduino ino = new PanamaHitek_Arduino();
-    PanamaHitek_Arduino ino2 = new PanamaHitek_Arduino();
-
-    // VARIABLES sensor PPG
-    final XYSeries SeriePPG = new XYSeries("PPG");
-    final XYSeriesCollection ColeccionPPG = new XYSeriesCollection();
-        // Media y varianza (+,-)
-    final XYSeries mediaPPG = new XYSeries("Media PPG");
-    final XYSeries varianzaPPG_p = new XYSeries("Varianza PPG (+)");
-    final XYSeries varianzaPPG_n = new XYSeries("Varianza PPG (-)");
-
-    // Create subplot 1
-    final XYDataset data1 = null;
-    final XYItemRenderer renderer1 = new StandardXYItemRenderer();
-    final NumberAxis rangeAxis1 = new NumberAxis("Sensor PPG");
-    final XYPlot subplot1 = new XYPlot(ColeccionPPG, null, rangeAxis1, renderer1);
-
-    // VARIABLES sensor GSR
-    final XYSeries SerieGSR = new XYSeries("GSR");
-    final XYSeriesCollection ColeccionGSR = new XYSeriesCollection();
-        // Media y varianza (+,-)
-    final XYSeries mediaGSR = new XYSeries("Media GSR");
-    final XYSeries varianzaGSR_p = new XYSeries("Varianza GSR (+)");
-    final XYSeries varianzaGSR_n = new XYSeries("Varianza GSR (-)");
-
-    // create subplot 2
-    final XYItemRenderer renderer2 = new StandardXYItemRenderer();
-    final NumberAxis rangeAxis2 = new NumberAxis("Sensor GSR");
-    final XYPlot subplot2 = new XYPlot(ColeccionGSR, null, rangeAxis2, renderer2);
-
-    // VARIABLES Tobii
-    final XYSeries SeriesTobbiEL = new XYSeries("Tobii EL");
-    final XYSeries SeriesTobbiER = new XYSeries("Tobii ER");
-    final XYSeriesCollection ColeccionEyesTobbi = new XYSeriesCollection();
-    // Create subplot 2
-    final XYItemRenderer renderer3 = new StandardXYItemRenderer();
-    final NumberAxis rangeAxis3 = new NumberAxis("Tobii ");
-    final XYPlot subplot3 = new XYPlot(ColeccionEyesTobbi, null, rangeAxis3, renderer3);
-
-    // Gráficas
-    JFreeChart Grafica;
-    final DateAxis timeAxis = new DateAxis("Time");
-    final CombinedDomainXYPlot plot = new CombinedDomainXYPlot(timeAxis);
-    double rangoInferiorPPG = 490.0;
-    double rangoSuperiorPPG = 550.0;
-    double rangoInferiorGSR = 10.0;
-    double rangoSuperiorGSR = 80.0;
-    double rangoInferiorET = 2.0;
-    double rangoSuperiorET = 5.0;
+    PanamaHitek_Arduino arduinoPPG = new PanamaHitek_Arduino();
+    PanamaHitek_Arduino arduinoGSR = new PanamaHitek_Arduino();
 
     // Markers
     final List<XYSeries> markers = new ArrayList<XYSeries>();
@@ -162,7 +147,7 @@ public class AdminController {
     private Double sumaCuadrados = 0.0;
     private Double varianza = 0.0;
 
-    // Controlador Papá
+    // Controlador Padre
     HelloApplication mainApp;
 
     // Seleccionar archivo
@@ -170,6 +155,16 @@ public class AdminController {
 
     // Archivo CSV para Lectura
     File csvFile;
+
+    // Elementos Gráfica PPG
+    XYChart.Series<Number, Number> seriesPPG;
+
+    // Elementos Gráfica GSR
+    XYChart.Series<Number, Number> seriesGSR;
+
+    // Elementos Gráfica TOBII
+    XYChart.Series<Number, Number> seriesTOBIIDerecho;
+    XYChart.Series<Number, Number> seriesTOBIIIzquierdo;
 
     // Archivos CSV para Escritura
     private FileWriter csvPPG;
@@ -182,7 +177,7 @@ public class AdminController {
     private int contadorLineasTiempos = 0;
 
     // Varios
-    int i = 0, j = 0, k = 0, l = 0;
+    Integer i = 0, j = 0, k = 0, l = 0;
     int numLecturasPPG = 0;
 
     /* SERIALPORT LISTENERS */
@@ -193,15 +188,24 @@ public class AdminController {
         @Override
         public void serialEvent(SerialPortEvent spe) {
             try {
-                if (ino2.isMessageAvailable() == true) {
+                if (arduinoGSR.isMessageAvailable()) {
                     Double data;
                     try {
-                        data = Double.parseDouble(ino2.printMessage());
+                        data = Double.parseDouble(arduinoGSR.printMessage());
                         int value = (int) Math.round(data);
-                        /*escribirGSR(String.valueOf(value) + ","
-                                + String.valueOf((new Date()).getTime()) + ","
-                                + contador_preguntas + "," + respuesta);*/
-                        SerieGSR.add(i, value);
+                        Platform.runLater(
+                                () -> {
+                                    seriesGSR.getData().add(new XYChart.Data<Number, Number>(i,value));
+                                    if(seriesGSR.getData().size()>50)
+                                        seriesGSR.getData().remove(0,1);
+
+                                    if(graficaGSR.getData().size()<1)
+                                        graficaGSR.getData().add(seriesGSR);
+                                    XYChart.Data<Number, Number> min = seriesGSR.getData().get(0);
+                                    xAxisGSR.setLowerBound(min.getXValue().doubleValue());
+                                    xAxisGSR.setUpperBound(min.getXValue().doubleValue() + 50);
+                                }
+                        );
                     } catch (ArduinoException | NumberFormatException | SerialPortException ex) {
                         System.out.println("Error data: " + ex);
                     }
@@ -215,24 +219,34 @@ public class AdminController {
     /**
      * Serial Listener para PPG
      */
-    SerialPortEventListener Listener = new SerialPortEventListener() {
+    SerialPortEventListener ListenerPPG = new SerialPortEventListener() {
         @Override
         public void serialEvent(SerialPortEvent spe) {
             k += 1;
             try {
-                if (ino.isMessageAvailable() == true) {
+                if(arduinoPPG.isMessageAvailable()) {
                     i++;
                     Double data = 0.0;
                     long current_time = (new Date()).getTime();
                     long calculo = (current_time - date_ini) / 1000;
                     if (calculo < tiempo_lectura) {
                         try {
-                            data = Double.parseDouble(ino.printMessage());
+                            data = Double.parseDouble(arduinoPPG.printMessage());
                             int value = (int) Math.round(data);
-                            /*escribirPPG(String.valueOf(value) + ","
-                                    + String.valueOf((new Date()).getTime()) + ","
-                                    + contador_preguntas + "," + respuesta);*/
-                            SeriePPG.add(i, value);
+                            Platform.runLater(
+                                    () -> {
+                                        seriesPPG.getData().add(new XYChart.Data<Number, Number>(i,value));
+                                        if(seriesPPG.getData().size()>50)
+                                            seriesPPG.getData().remove(0,1);
+
+                                        if(graficaPPG.getData().size()<1)
+                                            graficaPPG.getData().add(seriesPPG);
+                                        XYChart.Data<Number, Number> min = seriesPPG.getData().get(0);
+                                        xAxisPPG.setLowerBound(min.getXValue().doubleValue());
+                                        xAxisPPG.setUpperBound(min.getXValue().doubleValue() + 50);
+                                    }
+                            );
+
                             if(data > 0 && data < 1000) {
                                 numLecturasPPG++;
                                 sumaLecturasPPG += data;
@@ -256,32 +270,24 @@ public class AdminController {
                                     }
                                 }else{
                                     banderaCalculos = false;
-                                }
+                                }/* TODO:
                                 mediaPPG.add(i, media);
                                 varianzaPPG_p.add(i, media + varianza);
-                                varianzaPPG_n.add(i, media - varianza);
+                                varianzaPPG_n.add(i, media - varianza);*/
                             }
-
+/*
                             if(bandera) {
                                 XYSeries temp = new XYSeries("Punto " + i);
-                                temp.add(i, 1000);
+                                temp.add(i.toString(), 1000);
                                 temp.add(i + 5, 50);
                                 markers.add(temp);
-                                ColeccionPPG.addSeries(temp);
+                                //TODO: ColeccionPPG.addSeries(temp);
                                 bandera = false;
-                            }
+                            }*/
                         } catch (ArduinoException | NumberFormatException | SerialPortException ex) {
                             System.out.println("Error data: " + ex);
                         }
                     } else {
-                        /*try {
-                            csvPPG.close();
-                            csvGSR.close();
-                            csvET.close();
-                            contadorTiempos.close();
-                        } catch (IOException ex) {
-                            System.out.println("Error al cerrar el archivo: " + ex);
-                        }*/
                         System.exit(0);
                     }
                 }
@@ -300,20 +306,6 @@ public class AdminController {
         intervaloCorrectasField.setText("3");
         tabPane.getTabs().get(1).setDisable(true);
         tabPane.getTabs().get(2).setDisable(true);
-
-
-        /*try {
-            csvGSR = new FileWriter("gsr_" + tiempo + ".csv");
-            csvPPG = new FileWriter("ppg_" + tiempo + ".csv");
-            csvET = new FileWriter("et_" + tiempo + ".csv");
-            contadorTiempos = new FileWriter("tiemposrespuesta_" + tiempo + ".csv");
-        } catch (IOException ex) {
-            System.out.println("Ocurrió un error al abrir archivos: " + ex);
-        }*/
-        rangeAxis1.setRange(rangoInferiorPPG, rangoSuperiorPPG);
-        rangeAxis2.setRange(rangoInferiorGSR, rangoSuperiorGSR);
-        rangeAxis3.setRange(rangoInferiorET, rangoSuperiorET);
-        renderer3.setSeriesPaint(1, Color.BLACK);
     }
 
     public void setMainApp(HelloApplication mainApp){
@@ -361,7 +353,7 @@ public class AdminController {
         numLecturasPPG = 0;
         sumaLecturasPPG = 0.0;
         sumaCuadrados = 0.0;
-        media = (rangoSuperiorPPG + rangoSuperiorPPG)/2;
+        media = 512.0;
         lecturasPPG = new ArrayList<>();
         long tiempo = (new Date()).getTime();
         ultimoTiempo = (new Date()).getTime();
@@ -373,36 +365,58 @@ public class AdminController {
         cargaCSVButton.setDisable(true);
         verdaderoFalso.setDisable(true);
 
-        // Agregar las Series a las Gráficas
-        ColeccionPPG.addSeries(SeriePPG);
-        ColeccionPPG.addSeries(mediaPPG);
-        ColeccionPPG.addSeries(varianzaPPG_n);
-        ColeccionPPG.addSeries(varianzaPPG_p);
+        // Gráfica PPG
+        seriesPPG = new XYChart.Series<Number, Number>();
+        seriesPPG.setName("PPG");
 
-        ColeccionGSR.addSeries(SerieGSR);
-        ColeccionEyesTobbi.addSeries(SeriesTobbiEL);
-        ColeccionEyesTobbi.addSeries(SeriesTobbiER);
+        xAxisPPG.setForceZeroInRange(false);
+        xAxisPPG.setTickLabelsVisible(true);
+        xAxisPPG.setTickMarkVisible(true);
+        xAxisPPG.setAutoRanging(false);
 
-        plot.setGap(10.0);
+        yAxisPPG.setLowerBound(480);
+        yAxisPPG.setAutoRanging(true);
+        yAxisPPG.setForceZeroInRange(false);
 
-        plot.add(subplot1, 1);
-        plot.add(subplot2, 1);
-        plot.add(subplot3, 1);
-        plot.setOrientation(PlotOrientation.VERTICAL);
-        plot.setBackgroundPaint(Color.BLACK);
-        plot.setDomainGridlinePaint(Color.white);
-        plot.setRangeGridlinePaint(Color.white);
-        renderer3.setSeriesPaint(1, Color.BLACK);
+        graficaPPG.legendVisibleProperty().setValue(false);
+        graficaPPG.setCreateSymbols(false);
+        graficaPPG.setAnimated(false);
 
-        Grafica = new JFreeChart("PPG / GSR", JFreeChart.DEFAULT_TITLE_FONT, plot, true);
+        // Gráfica GSR
+        seriesGSR = new XYChart.Series<Number, Number>();
+        seriesPPG.setName("GSR");
 
-        ChartViewer viewer = new ChartViewer(Grafica);
-        //Stage stage2 = new Stage();
-        //stage2.setMaximized(true);
-        //stage2.setScene(new Scene(viewer));
-        //stage2.setTitle("Gráficas");
-        // stage2.show();
+        xAxisGSR.setForceZeroInRange(false);
+        xAxisGSR.setTickLabelsVisible(true);
+        xAxisGSR.setTickMarkVisible(true);
+        xAxisGSR.setAutoRanging(false);
 
+        yAxisGSR.setAutoRanging(true);
+        yAxisGSR.setForceZeroInRange(false);
+
+        graficaGSR.legendVisibleProperty().setValue(false);
+        graficaGSR.setCreateSymbols(false);
+        graficaGSR.setAnimated(false);
+
+        // Gráfica TOBII
+        seriesTOBIIDerecho = new XYChart.Series<Number, Number>();
+        seriesTOBIIIzquierdo = new XYChart.Series<Number, Number>();
+        seriesTOBIIDerecho.setName("TOBII Ojo Derecho");
+        seriesTOBIIIzquierdo.setName("TOBII Ojo Izquierdo");
+
+        xAxisTOBII.setForceZeroInRange(false);
+        xAxisTOBII.setTickLabelsVisible(true);
+        xAxisTOBII.setTickMarkVisible(true);
+        xAxisTOBII.setAutoRanging(false);
+
+        yAxisTOBII.setAutoRanging(true);
+        yAxisTOBII.setForceZeroInRange(false);
+
+        //graficaTOBII.legendVisibleProperty().setValue(false); //Quizá necesitemos especificar qué es cada color :v
+        graficaTOBII.setCreateSymbols(false);
+        graficaTOBII.setAnimated(false);
+
+        // TODO: Inicialo en otro Hilo xd
         // Carga la segunda ventana
         FXMLLoader loader = new FXMLLoader(getClass().getResource("primary.fxml"));
         // Si tenemos la segunda pantalla
@@ -426,7 +440,7 @@ public class AdminController {
         stage.setScene(new Scene(root));
         stage.setTitle("Preguntas");
         stage.show();
-        stage.setMaximized(true); // TODO: descomentar
+        //stage.setMaximized(true); // TODO: descomentar
 
         // Manejar el cierre de la ventana
         // Detener el contador
@@ -439,140 +453,19 @@ public class AdminController {
             tabPane.getSelectionModel().selectFirst();
         });
 
-        /* HILOS */
-
-        /*Thread t1 = new Thread() {
-            public void run() {
-                try {
-                    ino.arduinoRX(puertoSerialPPG, baudingPPG, Listener);
-                    //ino2.arduinoRX(puertoSerialPPG, baudingGSR, ListenerGSR);
-                } catch (ArduinoException ex) {
-                    Logger.getLogger(AdminController.class.getName()).log(Level.SEVERE, null, ex);
-                } catch (SerialPortException ex) {
-                    Logger.getLogger(AdminController.class.getName()).log(Level.SEVERE, null, ex);
-                }
-            }
-        };
-        t1.start();
-
-        Thread t5 = new Thread(){
-            @Override
-            public void run() {
-                System.out.println("Entre");
-                while (t1.isAlive()){
-
-                }
-            }
-        };
-        t5.run();*/
-        /*
-        Thread t4 = new Thread() {
-            public void run() {
-                while (true) {
-                    if(bandera){
-                        System.out.println("Entreeee");
-                        XYSeries temp = new XYSeries("Punto " + i);
-                        temp.add(i, 1000);
-                        temp.add(i+1, 0);
-                        ColeccionPPG.addSeries(temp);
-                        ColeccionGSR.addSeries(temp);
-                        ColeccionEyesTobbi.addSeries(temp);
-                        long tiempoActual = (new Date()).getTime();
-                        System.out.println("CONTADOR: " + contador_preguntas);
-
-                        if (contador_preguntas == 1) {
-                            System.out.println("ENTRA INIT");
-                            long tiempoTranscurrido = tiempoActual - date_ini;
-                            String dato = contador_preguntas + "," + tiempoTranscurrido/1000;
-                            ultimoTiempo = tiempoActual;
-                            contador_preguntas += 1;
-                            escribirTiempos(dato);
-                        } else {
-                            long tiempoTranscurrido = tiempoActual - ultimoTiempo;
-                            String dato = contador_preguntas + "," + tiempoTranscurrido/1000;
-                            ultimoTiempo = tiempoActual;
-                            contador_preguntas += 1;
-                            escribirTiempos(dato);
-                        }
-                    }
-
-                    Scanner keyboard = new Scanner(System.in);
-                    System.out.println("Responde: 1 Verdadero, 2 Falso");
-                    int lectura = keyboard.nextInt(); //1 sí, 0 no
-                    respuesta = lectura;
-                }
-            }
-        };*/
-        //t4.start();
-        /*
-        try{
-            // TODO: Revisar los puertos correctos
-            ino.arduinoRX(puertoSerialPPG, baudingPPG, Listener);
-            // TODO: Descomentar
-            // ino2.arduinoRX(puertoSerialPPG, baudingGSR, ListenerGSR);
-        }catch(ArduinoException ex){
-            Logger.getLogger(AdminController.class.getName()).log(Level.SEVERE, null, ex);
-        }catch(SerialPortException ex){
-            Logger.getLogger(AdminController.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        */
-
-    }
-
-    /** ESCRIBIR ARCHIVOS DE SALIDA */
-
-    public void escribirPPG(String dato) {
         try {
-            if (contadorLineasPPG == 0) {
-                csvPPG.write("valor,ts,pregunta,respuesta\n");
-                contadorLineasPPG += 1;
-            } else {
-                csvPPG.write(dato + "\n");
-            }
-        } catch (IOException ex) {
-            System.out.println("Error al escribir archivo PPG: " + ex);
+            arduinoPPG.arduinoRX(puertoSerialPPG, baudingPPG, ListenerPPG);
+            arduinoGSR.arduinoRX(puertoSerialGSR, baudingGSR, ListenerGSR);
+        } catch (ArduinoException ex) {
+            Logger.getLogger(GraficasMedicion.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (SerialPortException ex) {
+            Logger.getLogger(GraficasMedicion.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
-    public void escribirGSR(String dato) {
-        try {
-            if (contadorLineasGSR == 0) {
-                csvGSR.write("valor,ts,pregunta,respuesta\n");
-                contadorLineasGSR += 1;
-            } else {
-                csvGSR.write(dato + "\n");
-            }
-        } catch (IOException ex) {
-            System.out.println("Error al escribir archivo GSR: " + ex);
-        }
-    }
-
-    public void escribirET(String dato) {
-        try {
-            if (contadorLineasET == 0) {
-                csvET.write("valor_promedio,ts,pregunta,respuesta\n");
-                contadorLineasET += 1;
-            } else {
-                csvET.write(dato + "\n");
-            }
-        } catch (IOException ex) {
-            System.out.println("Error al escribir archivo ET: " + ex);
-        }
-    }
-
-    public void escribirTiempos(String dato) {
-        System.out.println("DATO A ESCRIBIR: " + dato);
-        try {
-            if (contadorLineasTiempos == 0) {
-                contadorTiempos.write("pregunta,tiempo\n");
-                contadorTiempos.write(dato + "\n");
-                contadorLineasTiempos += 1;
-            } else {
-                contadorTiempos.write(dato + "\n");
-            }
-        } catch (IOException ex) {
-            System.out.println("Error al escribir archivo TIEMPOS: " + ex);
-        }
+    @FXML
+    private void salir(){
+        System.exit(0);
     }
 
     /* GETTERS & SETTERS */

@@ -115,7 +115,8 @@ public class GraficasMedicion extends JFrame {
 	private boolean banderaCalculos = false;
 	private Double sumaLecturasPPG;
 	private List<Double> lecturasPPG;
-	private Integer segundosLectura = 10;
+	private List<Double> lecturasPPGxd;
+	private Integer segundosLectura = 1;
 	private Double media = 0.0;
 	private Double sumaCuadrados = 0.0;
 	private Double varianza = 0.0;
@@ -187,13 +188,16 @@ public class GraficasMedicion extends JFrame {
 	 * Serial Listener para PPG
 	 */
 	SerialPortEventListener Listener = new SerialPortEventListener() {
+
+		int numLecturas = 0;
+		long segundoActual = 0;
 		@Override
 		public void serialEvent(SerialPortEvent spe) {
 			k += 1;
 			try {
 				if (ino.isMessageAvailable() == true) {
 					time = System.currentTimeMillis();
-					// i++;
+					numLecturas++;
 					Double data = 0.0;
 					long current_time = (new Date()).getTime();
 					long calculo = (current_time - date_ini) / 1000;
@@ -207,8 +211,16 @@ public class GraficasMedicion extends JFrame {
 							 */
 							String dato = time + "," + value + "," + 0.0 + "," + 0.0 + "," + "'Sin datos'";
 							escribirLecturaS3(dato);
-							SeriePPG.add(time, value);
+
+
+
 							if (data > 500 && data < 1000) {
+								SeriePPG.add(time, value);
+								System.out.println("numero lecturas PPG: " + numLecturasPPG + " Tamano de la serie: " + SeriePPG.getItemCount());
+								if(SeriePPG.getItemCount() > 100){
+									SeriePPG.delete(0, 1);
+								}
+									//SeriePPG.delete(0, 10);
 								numLecturasPPG++;
 								sumaLecturasPPG += data;
 								lecturasPPG.add(data);
@@ -216,19 +228,25 @@ public class GraficasMedicion extends JFrame {
 								if (data > varianza)
 									pulsos++;
 							}
-							if (calculo >= segundosLectura) { // Se espera a que pasen los n segundos (o los definidos)
+							if (calculo > 30) { // Se espera a que pasen los 30 segundos (o los definidos)
 								if (calculo % segundosLectura == 0) { // Si es multiplo de n
+									if(calculo > segundoActual)
+										banderaCalculos = false;
 									if (!banderaCalculos) {
-										// TODO: Cálculos aki
-										// Debe entrar aqui una vez pasados 30 segundos");
-										System.out.println("Numero de lecturas: " + numLecturasPPG);
+										// Debe entrar aqui una vez pasados n segundos");
 										media = sumaLecturasPPG / numLecturasPPG;
 										varianza = sumaCuadrados / numLecturasPPG;
 										System.out.println("La media es: " + media + " y la Varianza es: " + varianza);
 										sumaCuadrados = 0.0;
 										sumaLecturasPPG = 0.0;
 										numLecturasPPG = 0;
-										lecturasPPG = new ArrayList<>();
+										// le quitas las del primer segundo
+										// vemos el tamaño
+										//lecturasPPG = new ArrayList<>();
+										if(lecturasPPG.size() > 600)
+											lecturasPPG = lecturasPPG.subList(lecturasPPG.size()-580, lecturasPPG.size()-1);
+
+										segundoActual = calculo;
 										banderaCalculos = true;
 									}
 									// Aki están los 6 segundos
@@ -245,6 +263,11 @@ public class GraficasMedicion extends JFrame {
 								mediaPPG.add(time, media);
 								varianzaPPG_p.add(time, media + varianza);
 								varianzaPPG_n.add(time, media - varianza);
+								if(mediaPPG.getItemCount()>100){
+									mediaPPG.delete(0, 1);
+									varianzaPPG_n.delete(0, 1);
+									varianzaPPG_p.delete(0, 1);
+								}
 							}
 
 							if (banderaPPG) {
@@ -291,6 +314,8 @@ public class GraficasMedicion extends JFrame {
 						data = Double.parseDouble(ino2.printMessage());
 						int value = (int) Math.round(data);
 						SerieGSR.add(time, value);
+						if(SerieGSR.getItemCount() > 100)
+							SerieGSR.delete(0, 1);
 						/*
 						 * if(j%100 == 0) { XYSeries temp = new XYSeries("Punto " + j); temp.add(j,
 						 * 1000); temp.add(j+1, 50); markers.add(temp); k++; Coleccion2.addSeries(temp);
@@ -398,8 +423,10 @@ public class GraficasMedicion extends JFrame {
 		plot.setGap(10.0);
 
 		// rangeAxis1 = (NumberAxis) subplot1.getDomainAxis();
-		rangeAxis1.setRange(500, 520.00);
-		rangeAxis1.setAutoRangeMinimumSize(450);
+		//rangeAxis1.setRange(490, 590.00);
+		rangeAxis1.setAutoRange(true);
+		rangeAxis1.setAutoRangeIncludesZero(false);
+		//rangeAxis1.setAutoRangeMinimumSize(450);
 		// add the subplots...
 		subplot1.setRenderer(renderer1);
 		subplot2.setRenderer(renderer2);

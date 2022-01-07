@@ -197,3 +197,10 @@ ChoiceBox {
     -fx-background-color: linear-gradient(to left, #0f3443, #34e89e);
 }
 
+/************************************ G R Á F I C A S ***********************************/
+.graficaPPG .default-color0.chart-series-line { -fx-stroke: #00ff00; }
+
+.graficaGSR .default-color0.chart-series-line { -fx-stroke: #0000ff; }
+
+.graficaTOBII .default-color0.chart-series-line { -fx-stroke: #F39C12; }
+.graficaTOBII .default-color1.chart-series-line { -fx-stroke: #76448A; }

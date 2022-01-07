@@ -22,6 +22,7 @@ module mx.com.cuatronetworks.sensoresbpdp {
     requires software.amazon.awssdk.services.polly;
     requires software.amazon.awssdk.auth;
     requires software.amazon.awssdk.regions;
+    requires org.knowm.xchart;
 
     opens mx.com.cuatronetworks.sensoresbpdp to javafx.fxml;
     exports mx.com.cuatronetworks.sensoresbpdp;
