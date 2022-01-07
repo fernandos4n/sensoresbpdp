@@ -325,14 +325,14 @@ public class PrimaryController {
                         enviarBandera(isPreguntando);
                     }
                 }
-            });
+            });/*
             Platform.runLater(() -> {
                 try { // TODO: revisar bien esto ggg
                     player.play();
                 } catch (JavaLayerException e) {
                     e.printStackTrace();
                 }
-            });
+            });*/
 
         } else {
             Platform.runLater(() -> {
