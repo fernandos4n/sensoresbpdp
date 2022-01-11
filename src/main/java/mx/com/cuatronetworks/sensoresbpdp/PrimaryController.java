@@ -8,6 +8,9 @@ import java.util.List;
 
 import javax.swing.*;
 
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
+import javafx.scene.Node;
 import org.knowm.xchart.QuickChart;
 import org.knowm.xchart.SwingWrapper;
 import org.knowm.xchart.XYChart;
@@ -29,7 +32,7 @@ import software.amazon.awssdk.services.polly.model.OutputFormat;
 /**
  * @author Fernando Sánchez Castro
  */
-public class PrimaryController {
+public class PrimaryController implements Runnable{
     /** Elementos FXML de la interfaz gráfica*/
 	@FXML
 	private Label preguntaLabel;
@@ -60,8 +63,9 @@ public class PrimaryController {
 	List<Respuesta> respuestasList = new ArrayList<>();
 	List<Pregunta> preguntasList = new ArrayList<>();
 
-    GraficasMedicion graficas;
-    SwingWorkerRealTime graficas2;
+    /** Variables asociadas a los elementos gráficos */
+    private SimpleStringProperty preguntaActual;
+    private SimpleStringProperty instruccionActual;
 
 	Timer timer;
 	TextToSpeech customPolly = null;
@@ -89,20 +93,15 @@ public class PrimaryController {
 	@FXML
 	private void initialize() {
         // Elementos Gráficos
-		instruccionLabel.setText("Bienvenido");
-		preguntaLabel.setText("Presione INICIAR cuando esté listo");
+        instruccionActual = new SimpleStringProperty("Bienvenido");
+        preguntaActual = new SimpleStringProperty("Presione INICIAR cuando esté listo");
+        instruccionLabel.textProperty().bind(instruccionActual);
+        preguntaLabel.textProperty().bind(preguntaActual);
+
         botonNo.setVisible(false);
         botonSi.setVisible(false);
         // Inicializar amazon Polly
         customPolly = new TextToSpeech(Region.US_EAST_1);
-        //Region.US_EAST_1
-        graficas2 = new SwingWorkerRealTime();
-        Platform.runLater(
-            () -> {
-                //graficas = new GraficasMedicion();
-
-            }
-        );
 	}
 
     /**
@@ -113,7 +112,6 @@ public class PrimaryController {
         botonIniciar.setVisible(false);
         botonNo.setVisible(true);
         botonSi.setVisible(true);
-        //this.go();
         this.preguntasList = parentController.getPreguntasList();
         totalPreguntas = preguntasList.size();
         timer = new Timer(5, e -> {
@@ -231,7 +229,7 @@ public class PrimaryController {
      */
     @FXML
     private void contestaSi() {
-        enviarMarca(intQuestion+1, botonSi.getText());
+        //enviarMarca(intQuestion+1, botonSi.getText());
         contesto = true;
         String pregunta=preguntasList.get(intQuestion).getRespuesta_esperada();
         tiempoFinal = min + ":" + seg + ":" + mil;
@@ -249,7 +247,7 @@ public class PrimaryController {
      */
     @FXML
     private void contestoNo() {
-        enviarMarca(intQuestion+1, botonNo.getText());
+        //enviarMarca(intQuestion+1, botonNo.getText());
         contesto = true;
         String pregunta=preguntasList.get(intQuestion).getReactivo();
         tiempoFinal = min + ":" + seg + ":" + mil;
@@ -268,34 +266,35 @@ public class PrimaryController {
      * Obtiene la pregunta para mostrarla en pantalla y la reproduce
      */
     public void GenerarPreguntas() throws IOException, JavaLayerException {
-        System.out.println("Número de pregunta: " + intQuestion+1);
         contesto = false;
         Pregunta pregunta = preguntasList.get(intQuestion);
         Platform.runLater(() -> {
             if(intQuestion < totalPreguntas){
-                preguntaLabel.setText(pregunta.getReactivo());
-                parentController.getPreguntaLabel().setText(pregunta.getReactivo());
+                preguntaActual.setValue(pregunta.getReactivo());
+                //parentController.setPreguntaActual(pregunta.getReactivo());
+                //parentController.getPreguntaLabel().setText(pregunta.getReactivo());
+                //modificarLabelAdmin(pregunta.getReactivo());
                 // Validar si es instrucción o espera
                 if(pregunta.getTema().equalsIgnoreCase(Pregunta.INSTRUCCION)){
-                    instruccionLabel.setText("");
+                    instruccionActual.setValue("");
                 }else if(pregunta.getTema().equalsIgnoreCase(Pregunta.ESPERA)){
-                    instruccionLabel.setText("Instrucción");
+                    instruccionActual.setValue("Instrucción");
                     // TODO: Hacer la espera
                 }else{
                     if(intervaloCorrectas != 0){
                         if (intQuestion % intervaloCorrectas == 0) {
                             preguntaLabel.setStyle("-fx-text-fill: #FF0000");
                             instruccionLabel.setStyle("-fx-text-fill: #FF0000");
-                            instruccionLabel.setText("Contesta con una mentira");
+                            instruccionActual.setValue("Contesta con una mentira");
                         } else {
                             preguntaLabel.setStyle("-fx-text-fill: #00FF00");
                             instruccionLabel.setStyle("-fx-text-fill: #00FF00");
-                            instruccionLabel.setText("Contesta con la verdad");
+                            instruccionActual.setValue("Contesta con la verdad");
                         }
                     }else{
                         preguntaLabel.setStyle("-fx-text-fill: #000000");
                         instruccionLabel.setStyle("-fx-text-fill: #000000");
-                        instruccionLabel.setText("Responde la siguiente pregunta:");
+                        instruccionActual.setValue("Responde la siguiente pregunta:");
                     }
                 }
             }
@@ -325,7 +324,18 @@ public class PrimaryController {
                         enviarBandera(isPreguntando);
                     }
                 }
-            });/*
+            });
+            Thread t1 = new Thread() {
+                public void run() {
+                    try {
+                        player.play();
+                    } catch (JavaLayerException e) {
+                        e.printStackTrace();
+                    }
+                }
+            };
+            t1.run();
+            /*
             Platform.runLater(() -> {
                 try { // TODO: revisar bien esto ggg
                     player.play();
@@ -346,16 +356,29 @@ public class PrimaryController {
     }
 
     /**
+     * Modifica el Label en AdminController
+     */
+    private void modificarLabelAdmin(String valor){
+        /*new Thread(() -> {
+            parentController.getPreguntaLabel().setText("Holi");
+        }).run();*/
+
+        Platform.runLater(() -> {
+            parentController.getPreguntaLabel().setText(valor);
+        });
+    }
+
+    /**
      * Envía los datos a la pantalla de Administración
      */
     private void enviarMarca(Integer numPregunta, String respuesta){
         Platform.runLater(
             () -> {
-                parentController.getNumPreguntaLabel().setText(numPregunta.toString());
-                parentController.getRespuestaLabel().setText(respuesta);
+                //parentController.getNumPreguntaLabel().setText(numPregunta.toString());
+                //parentController.getRespuestaLabel().setText(respuesta);
                 parentController.setBandera(true);
-                graficas.setBanderas(true);
-                graficas.setContador_preguntas(numPregunta);
+                //graficas.setBanderas(true);
+                //graficas.setContador_preguntas(numPregunta);
             }
         );
     }
@@ -367,6 +390,11 @@ public class PrimaryController {
                     //graficas.setBandera(preguntando);
                 }
         );
+    }
+
+    @Override
+    public void run() {
+
     }
 
     private class MySwingWorker extends SwingWorker<Boolean, double[]> {

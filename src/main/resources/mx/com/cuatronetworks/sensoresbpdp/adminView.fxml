@@ -15,9 +15,9 @@
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane fx:id="anchorPane" prefHeight="720.0" prefWidth="1200.0" style="-fx-background-color: #fff;" stylesheets="@styles.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="mx.com.cuatronetworks.sensoresbpdp.AdminController">
+<AnchorPane fx:id="anchorPane" prefHeight="720.0" prefWidth="1200.0" stylesheets="@styles.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="mx.com.cuatronetworks.sensoresbpdp.AdminController">
    <children>
-      <TabPane fx:id="tabPane" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" style="-fx-background-color: #fff;" tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="14.0" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="14.0">
+      <TabPane fx:id="tabPane" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="14.0" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="14.0">
         <tabs>
           <Tab text="Inicio">
             <content>
@@ -32,65 +32,44 @@
                           </columnConstraints>
                           <rowConstraints>
                             <RowConstraints percentHeight="20.0" vgrow="SOMETIMES" />
+                              <RowConstraints percentHeight="10.0" vgrow="SOMETIMES" />
                             <RowConstraints percentHeight="10.0" vgrow="SOMETIMES" />
-                              <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                              <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                              <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                              <RowConstraints percentHeight="10.0" vgrow="SOMETIMES" />
+                              <RowConstraints vgrow="SOMETIMES" />
+                              <RowConstraints percentHeight="5.0" vgrow="SOMETIMES" />
+                            <RowConstraints vgrow="SOMETIMES" />
                           </rowConstraints>
                            <children>
-                              <Button fx:id="cargaCSVButton" alignment="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#loadCSV" text="CARGAR CSV" textAlignment="CENTER" wrapText="true" GridPane.columnIndex="2" GridPane.rowIndex="5">
+                              <Button fx:id="cargaCSVButton" alignment="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#loadCSV" text="CARGAR CSV" textAlignment="CENTER" wrapText="true" GridPane.columnIndex="2" GridPane.rowIndex="6">
                                  <GridPane.margin>
                                     <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
                                  </GridPane.margin>
                                  <font>
-                                    <Font size="32.0" />
+                                    <Font name="Ubuntu" size="32.0" />
                                  </font>
                               </Button>
-                              <Button fx:id="iniciarButton" alignment="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#iniciarPreguntas" text="INICIAR PRUEBA" textAlignment="CENTER" wrapText="true" GridPane.columnIndex="3" GridPane.rowIndex="5">
+                              <Button fx:id="iniciarButton" alignment="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#iniciarPreguntas" text="INICIAR PRUEBA" textAlignment="CENTER" wrapText="true" GridPane.columnIndex="3" GridPane.rowIndex="6">
                                  <GridPane.margin>
                                     <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
                                  </GridPane.margin>
                                  <font>
-                                    <Font size="32.0" />
+                                    <Font name="Ubuntu" size="32.0" />
                                  </font>
                               </Button>
-                              <Label fx:id="nombreCSVLabel" alignment="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" styleClass="subtitulo-cont" text="Ningun CSV Seleccionado" textAlignment="CENTER" wrapText="true" GridPane.columnSpan="2" GridPane.rowIndex="2" GridPane.rowSpan="3">
+                              <Label fx:id="nombreCSVLabel" alignment="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" styleClass="subtitulo-cont" text="Ningún CSV seleccionado" textAlignment="CENTER" wrapText="true" GridPane.columnSpan="4" GridPane.rowIndex="1" GridPane.rowSpan="2">
                                  <font>
-                                    <Font size="32.0" />
+                                    <Font name="Ubuntu" size="32.0" />
                                  </font>
                               </Label>
-                              <CheckBox fx:id="verdaderoFalso" alignment="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Verdadero/Falso" textAlignment="CENTER" wrapText="true" GridPane.columnIndex="2" GridPane.columnSpan="2" GridPane.rowIndex="4">
+                              <Label alignment="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" styleClass="titulo" text="DPR - Consola de administración" textAlignment="CENTER" wrapText="true" GridPane.columnSpan="4">
                                  <font>
-                                    <Font size="32.0" />
+                                    <Font name="Ubuntu" size="32.0" />
                                  </font>
                                  <GridPane.margin>
-                                    <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                                    <Insets bottom="5.0" top="5.0" />
                                  </GridPane.margin>
-                              </CheckBox>
-                              <Label alignment="CENTER_RIGHT" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="Tiempo Lectura:" textAlignment="RIGHT" GridPane.columnIndex="2" GridPane.rowIndex="2">
-                                 <font>
-                                    <Font size="32.0" />
-                                 </font></Label>
-                              <TextField fx:id="tiempoLecturaField" alignment="CENTER" maxWidth="1.7976931348623157E308" GridPane.columnIndex="3" GridPane.rowIndex="2">
-                                 <GridPane.margin>
-                                    <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
-                                 </GridPane.margin>
-                                 <font>
-                                    <Font size="32.0" />
-                                 </font></TextField>
-                              <Label alignment="CENTER_RIGHT" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="Intervalo de respuestas correctas/incorrectas (0 = sin intervalo):" textAlignment="RIGHT" wrapText="true" GridPane.columnIndex="2" GridPane.rowIndex="3">
-                                 <font>
-                                    <Font size="28.0" />
-                                 </font></Label>
-                              <TextField fx:id="intervaloCorrectasField" alignment="CENTER" maxWidth="1.7976931348623157E308" GridPane.columnIndex="3" GridPane.rowIndex="3">
-                                 <GridPane.margin>
-                                    <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
-                                 </GridPane.margin>
-                                 <font>
-                                    <Font size="32.0" />
-                                 </font></TextField>
-                              <Label alignment="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" styleClass="titulo" text="DPR - Consola de Administracion" textAlignment="CENTER" wrapText="true" GridPane.columnSpan="4">
+                              </Label>
+                              <Label alignment="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefWidth="439.0" styleClass="subtitulo" text="Opciones" textAlignment="CENTER" wrapText="true" GridPane.columnSpan="4" GridPane.rowIndex="3">
                                  <font>
                                     <Font size="32.0" />
                                  </font>
@@ -98,22 +77,66 @@
                                     <Insets bottom="5.0" top="5.0" />
                                  </GridPane.margin>
                               </Label>
-                              <Label alignment="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefWidth="439.0" styleClass="subtitulo" text="Opciones" textAlignment="CENTER" wrapText="true" GridPane.columnSpan="4" GridPane.rowIndex="1">
-                                 <font>
-                                    <Font size="32.0" />
-                                 </font>
-                                 <GridPane.margin>
-                                    <Insets bottom="5.0" top="5.0" />
-                                 </GridPane.margin>
-                              </Label>
-                              <Button fx:id="salirButton" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#salir" styleClass="boton-cerrar" text="SALIR" GridPane.rowIndex="5">
+                              <Button fx:id="salirButton" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#salir" styleClass="boton-cerrar" text="SALIR" GridPane.rowIndex="6">
                                  <GridPane.margin>
                                     <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
                                  </GridPane.margin>
                                  <font>
-                                    <Font size="32.0" />
+                                    <Font name="Ubuntu" size="32.0" />
                                  </font>
                               </Button>
+                              <GridPane gridLinesVisible="true" style="-fx-background-color: #0139d8;" GridPane.columnSpan="4" GridPane.rowIndex="4">
+                                <columnConstraints>
+                                  <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                                  <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                                    <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                                </columnConstraints>
+                                <rowConstraints>
+                                    <RowConstraints percentHeight="50.0" vgrow="SOMETIMES" />
+                                  <RowConstraints percentHeight="50.0" vgrow="SOMETIMES" />
+                                </rowConstraints>
+                                 <children>
+                                    <Label alignment="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="Tiempo de lectura:" textAlignment="CENTER" textFill="WHITE" wrapText="true">
+                                       <font>
+                                          <Font size="28.0" />
+                                       </font>
+                                    </Label>
+                                    <TextField fx:id="tiempoLecturaField" alignment="CENTER" maxWidth="1.7976931348623157E308" GridPane.rowIndex="1">
+                                       <GridPane.margin>
+                                          <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                                       </GridPane.margin>
+                                       <font>
+                                          <Font size="32.0" />
+                                       </font>
+                                    </TextField>
+                                    <Label alignment="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="Intervalo de respuestas correctas/incorrectas (0 = sin intervalo):" textAlignment="CENTER" wrapText="true" GridPane.columnIndex="1">
+                                       <font>
+                                          <Font size="28.0" />
+                                       </font>
+                                    </Label>
+                                    <TextField fx:id="intervaloCorrectasField" alignment="CENTER" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                                       <GridPane.margin>
+                                          <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                                       </GridPane.margin>
+                                       <font>
+                                          <Font size="32.0" />
+                                       </font>
+                                    </TextField>
+                                    <CheckBox fx:id="verdaderoFalso" alignment="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" textAlignment="CENTER" wrapText="true" GridPane.columnIndex="2" GridPane.rowIndex="1">
+                                       <font>
+                                          <Font size="32.0" />
+                                       </font>
+                                       <GridPane.margin>
+                                          <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                                       </GridPane.margin>
+                                    </CheckBox>
+                                    <Label alignment="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="Verdadero/Falso" textAlignment="CENTER" wrapText="true" GridPane.columnIndex="2">
+                                       <font>
+                                          <Font size="28.0" />
+                                       </font>
+                                    </Label>
+                                 </children>
+                              </GridPane>
                            </children>
                         </GridPane>
                      </children>
@@ -167,36 +190,36 @@
                               </Label>
                               <LineChart fx:id="graficaPPG" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" styleClass="graficaPPG" title="Sensor PPG" GridPane.columnSpan="2" GridPane.rowIndex="3">
                                 <xAxis>
-                                  <NumberAxis label="Tiempo" side="BOTTOM" fx:id="xAxisPPG" />
+                                  <NumberAxis label="Tiempo" side="BOTTOM" tickLabelFill="WHITE" fx:id="xAxisPPG" />
                                 </xAxis>
                                 <yAxis>
-                                  <NumberAxis fx:id="yAxisPPG" label="Valor de Lectura" side="LEFT" />
+                                  <NumberAxis fx:id="yAxisPPG" label="Valor de Lectura" side="LEFT" tickLabelFill="WHITE" />
                                 </yAxis>
                               </LineChart>
-                              <Label alignment="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" styleClass="subtitulo" text="Lecturas en Tiempo Real" textAlignment="CENTER" GridPane.columnSpan="2" GridPane.rowIndex="2">
+                              <Label alignment="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" styleClass="subtitulo" text="Lecturas en tiempo real" textAlignment="CENTER" GridPane.columnSpan="2" GridPane.rowIndex="2">
                                  <font>
                                     <Font size="20.0" />
                                  </font>
                               </Label>
-                              <Label alignment="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" styleClass="subtitulo" text="Graficos de CoNtRoL" textAlignment="CENTER" GridPane.columnIndex="2" GridPane.columnSpan="2" GridPane.rowIndex="2">
+                              <Label alignment="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" styleClass="subtitulo" text="Gráficos de control" textAlignment="CENTER" GridPane.columnIndex="2" GridPane.columnSpan="2" GridPane.rowIndex="2">
                                  <font>
                                     <Font size="20.0" />
                                  </font>
                               </Label>
                               <LineChart fx:id="graficaGSR" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" styleClass="graficaGSR" title="Sensor GSR" GridPane.columnSpan="2" GridPane.rowIndex="4">
                                 <xAxis>
-                                  <NumberAxis label="Tiempo" side="BOTTOM" fx:id="xAxisGSR" />
+                                  <NumberAxis label="Tiempo" side="BOTTOM" tickLabelFill="WHITE" fx:id="xAxisGSR" />
                                 </xAxis>
                                 <yAxis>
-                                  <NumberAxis fx:id="yAxisGSR" label="Valor de Lectura" side="LEFT" />
+                                  <NumberAxis fx:id="yAxisGSR" label="Valor de Lectura" side="LEFT" tickLabelFill="WHITE" />
                                 </yAxis>
                               </LineChart>
                               <LineChart fx:id="graficaTOBII" styleClass="graficaTOBII" title="Sensor TOBII" GridPane.columnSpan="2" GridPane.rowIndex="5">
                                 <xAxis>
-                                  <NumberAxis label="Tiempo" side="BOTTOM" fx:id="xAxisTOBII" />
+                                  <NumberAxis label="Tiempo" side="BOTTOM" tickLabelFill="WHITE" fx:id="xAxisTOBII" />
                                 </xAxis>
                                 <yAxis>
-                                  <NumberAxis fx:id="yAxisTOBII" label="Valor de Lectura" side="LEFT" />
+                                  <NumberAxis fx:id="yAxisTOBII" label="Valor de Lectura" side="LEFT" tickLabelFill="WHITE" />
                                 </yAxis>
                               </LineChart>
                            </children>

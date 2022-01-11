@@ -2,8 +2,12 @@
 Fernando Sánchez 2021
 **/
 
+.root {
+     -fx-background-color: #031123;
+}
+
 .label {
-    -fx-text-fill: #000;
+    -fx-text-fill: #fff;
 }
 
 .text-input {
@@ -22,21 +26,20 @@ Fernando Sánchez 2021
 Button {
 	-fx-border-radius: 15px;
 	-fx-background-radius: 15px;
-	-fx-background-color: white;
-	-fx-border-color: #00833D;
+	-fx-background-color: #003deb;
+	-fx-border-color: #031123;
 	-fx-border-width: 2px;
-	-fx-text-fill: #000;
+	-fx-text-fill: #fff;
 }
 
 Button:hover{
-	-fx-background-color: #00833D;
+	-fx-border-color: #f9d73c;
 	-fx-text-fill: white;
 }
 
 Button:pressed, Button:default:hover:pressed{
-	-fx-background-color: #00833D;
+	-fx-background-color: #0039da;
 	-fx-text-fill: white;
-	-fx-font-size: 11pt;
 }
 
 TextField, PasswordField {
@@ -104,15 +107,16 @@ ChoiceBox {
 }
 
 .titulo {
-	-fx-background-color:  #00833D;
+	-fx-background-color: #003deb;
 	-fx-text-fill: white;
 }
 
 .subtitulo {
-	-fx-background-color: #96D9B3;
+	-fx-background-color: #0139d8;
 }
 .subtitulo-cont {
-	-fx-background-color: #D5F2E2;
+	-fx-background-color: #FFF;
+	-fx-text-fill: #000;
 }
 .text-field.error { 
 	-fx-border-color: red;
@@ -159,7 +163,7 @@ ChoiceBox {
 .tab-pane .tab:selected {
 	-fx-border-radius: 10px 10px 0px 0px;
 	-fx-background-radius: 10px 10px 0px 0px;
-	-fx-background-color: #00833D;
+	-fx-background-color: #003deb;
 }
 
 .tab .tab:pressed {
@@ -186,7 +190,7 @@ ChoiceBox {
     -fx-border-radius: 5px;
     -fx-background-radius: 5px;
     -fx-background-color: white;
-    -fx-border-color: #00833D;
+    -fx-border-color: #003deb;
     -fx-border-width: 2px;
     -fx-text-fill: #000;
 }
