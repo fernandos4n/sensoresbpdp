@@ -13,8 +13,8 @@ public class HelloApplication extends Application {
 
     @Override
     public void start(Stage stage) throws IOException {
-        FXMLLoader fxmlLoader = new FXMLLoader(HelloApplication.class.getResource("adminView.fxml"));
-        scene = new Scene(fxmlLoader.load(), 640, 480);
+        FXMLLoader fxmlLoader = new FXMLLoader(HelloApplication.class.getResource("adminViewBAK.fxml"));
+        scene = new Scene(fxmlLoader.load(), 1200, 720);
         stage.setTitle("Consola de Administración");
         stage.setScene(scene);
         stage.setAlwaysOnTop(true);
