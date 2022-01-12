@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ProgressBar?>
@@ -36,23 +37,32 @@
                <font>
                   <Font name="Ubuntu" size="28.0" />
                </font></Label>
-            <Button fx:id="botonSi" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#contestaSi" styleClass="boton-iniciar" text="Sí" textAlignment="CENTER" GridPane.columnIndex="1" GridPane.rowIndex="3">
+            <Button fx:id="botonSi" contentDisplay="TOP" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#contestaSi" styleClass="boton-iniciar" text="Sí" textAlignment="CENTER" GridPane.columnIndex="1" GridPane.rowIndex="3">
                <font>
                   <Font size="30.0" />
-               </font></Button>
-            <Button fx:id="botonNo" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#contestoNo" styleClass="boton-cerrar" text="No" textAlignment="CENTER" GridPane.columnIndex="3" GridPane.rowIndex="3">
+               </font>
+               <graphic>
+                  <FontAwesomeIconView fill="WHITE" glyphName="CHECK" />
+               </graphic></Button>
+            <Button fx:id="botonNo" contentDisplay="TOP" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#contestoNo" styleClass="boton-cerrar" text="No" textAlignment="CENTER" GridPane.columnIndex="3" GridPane.rowIndex="3">
                <font>
                   <Font size="30.0" />
-               </font></Button>
+               </font>
+               <graphic>
+                  <FontAwesomeIconView fill="WHITE" glyphName="TIMES" />
+               </graphic></Button>
             <ProgressBar fx:id="barraProgreso" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" progress="0.0" GridPane.columnSpan="5" GridPane.rowIndex="5" />
             <Label fx:id="tiempoLabel" alignment="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" textAlignment="CENTER">
                <font>
                   <Font size="24.0" />
                </font></Label>
-            <Button fx:id="botonIniciar" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#start" styleClass="boton-iniciar" text="Iniciar" textAlignment="CENTER" GridPane.columnIndex="2" GridPane.rowIndex="3">
+            <Button fx:id="botonIniciar" contentDisplay="TOP" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#start" styleClass="boton-iniciar" text="Iniciar" textAlignment="CENTER" GridPane.columnIndex="2" GridPane.rowIndex="3">
                <font>
                   <Font size="30.0" />
                </font>
+               <graphic>
+                  <FontAwesomeIconView fill="WHITE" glyphName="PLAY" />
+               </graphic>
             </Button>
          </children>
       </GridPane>

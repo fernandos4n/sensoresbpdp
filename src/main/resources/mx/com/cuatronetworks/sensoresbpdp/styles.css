@@ -26,7 +26,7 @@ Fernando Sánchez 2021
 Button {
 	-fx-border-radius: 15px;
 	-fx-background-radius: 15px;
-	-fx-background-color: #003deb;
+	-fx-background-color: #126df4;
 	-fx-border-color: #031123;
 	-fx-border-width: 2px;
 	-fx-text-fill: #fff;
@@ -107,24 +107,16 @@ ChoiceBox {
 }
 
 .titulo {
-	-fx-background-color: #003deb;
+	-fx-background-color: #126df4;
 	-fx-text-fill: white;
 }
 
 .subtitulo {
-	-fx-background-color: #0139d8;
+	-fx-background-color: 3B3838;
 }
 .subtitulo-cont {
 	-fx-background-color: #FFF;
 	-fx-text-fill: #000;
-}
-.text-field.error { 
-	-fx-border-color: red;
-	-fx-border-width: 2px;
-}
-.text-field.success { 
-	-fx-border-color: #00ff00;
-	-fx-border-width: 2px;
 }
 
 .table-row-cell:empty {
@@ -163,14 +155,14 @@ ChoiceBox {
 .tab-pane .tab:selected {
 	-fx-border-radius: 10px 10px 0px 0px;
 	-fx-background-radius: 10px 10px 0px 0px;
-	-fx-background-color: #003deb;
+	-fx-background-color: #126df4;
 }
 
 .tab .tab:pressed {
 	-fx-border-radius: 10px 10px 0px 0px;
 	-fx-background-radius: 10px 10px 0px 0px;
 	-fx-border-radius: 10px 10px 0px 0px;
-	-fx-border-color: #2E4053;
+	-fx-border-color: #126df4;
 }
 
 .tab:selected .tab-label {
