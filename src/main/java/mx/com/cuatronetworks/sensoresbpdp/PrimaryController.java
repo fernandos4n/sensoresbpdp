@@ -271,6 +271,7 @@ public class PrimaryController implements Runnable{
         Platform.runLater(() -> {
             if(intQuestion < totalPreguntas){
                 preguntaActual.setValue(pregunta.getReactivo());
+                parentController.setNumPregunta(intQuestion);
                 //parentController.setPreguntaActual(pregunta.getReactivo());
                 //parentController.getPreguntaLabel().setText(pregunta.getReactivo());
                 //modificarLabelAdmin(pregunta.getReactivo());
@@ -283,17 +284,17 @@ public class PrimaryController implements Runnable{
                 }else{
                     if(intervaloCorrectas != 0){
                         if (intQuestion % intervaloCorrectas == 0) {
-                            preguntaLabel.setStyle("-fx-text-fill: #FF0000");
-                            instruccionLabel.setStyle("-fx-text-fill: #FF0000");
+                            //preguntaLabel.setStyle("-fx-text-fill: #FF0000");
+                            //instruccionLabel.setStyle("-fx-text-fill: #FF0000");
                             instruccionActual.setValue("Contesta con una mentira");
                         } else {
-                            preguntaLabel.setStyle("-fx-text-fill: #00FF00");
-                            instruccionLabel.setStyle("-fx-text-fill: #00FF00");
+                            //preguntaLabel.setStyle("-fx-text-fill: #00FF00");
+                            //instruccionLabel.setStyle("-fx-text-fill: #00FF00");
                             instruccionActual.setValue("Contesta con la verdad");
                         }
                     }else{
-                        preguntaLabel.setStyle("-fx-text-fill: #000000");
-                        instruccionLabel.setStyle("-fx-text-fill: #000000");
+                        //preguntaLabel.setStyle("-fx-text-fill: #000000");
+                        //instruccionLabel.setStyle("-fx-text-fill: #000000");
                         instruccionActual.setValue("Responde la siguiente pregunta:");
                     }
                 }
@@ -359,10 +360,6 @@ public class PrimaryController implements Runnable{
      * Modifica el Label en AdminController
      */
     private void modificarLabelAdmin(String valor){
-        /*new Thread(() -> {
-            parentController.getPreguntaLabel().setText("Holi");
-        }).run();*/
-
         Platform.runLater(() -> {
             parentController.getPreguntaLabel().setText(valor);
         });
