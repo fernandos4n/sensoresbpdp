@@ -31,9 +31,9 @@ import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
-import software.amazon.awssdk.services.s3.S3AsyncClient;
+/*import software.amazon.awssdk.services.s3.S3AsyncClient;
 import software.amazon.awssdk.services.s3.S3AsyncClientBuilder;
-import software.amazon.awssdk.services.s3.model.PutObjectRequest;
+import software.amazon.awssdk.services.s3.model.PutObjectRequest;*/
 
 import java.io.FileWriter;
 import java.io.IOException;
@@ -168,7 +168,7 @@ public class GraficasMedicion extends JFrame {
 		AwsCredentialsProvider awsCredentialsProvider = StaticCredentialsProvider.create(awsBasicCredentials);
 		/*AWSCredentials credentials = new BasicAWSCredentials("AKIAT6JLQQW37JVK4IFG",
 				"c08zfntPoBnF5O0G3dvizMarT/nlGthf9dejfdB8");*/
-		S3AsyncClient s3AsyncClient = S3AsyncClient.builder().region(Region.US_EAST_1).credentialsProvider(awsCredentialsProvider).build();
+		//S3AsyncClient s3AsyncClient = S3AsyncClient.builder().region(Region.US_EAST_1).credentialsProvider(awsCredentialsProvider).build();
 		/*
 		AmazonS3 s3client = AmazonS3ClientBuilder.standard()
 				.withCredentials(new AWSStaticCredentialsProvider(credentials)).withRegion(Regions.US_EAST_2).build();

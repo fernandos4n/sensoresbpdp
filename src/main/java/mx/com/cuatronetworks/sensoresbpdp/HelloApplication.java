@@ -13,13 +13,17 @@ public class HelloApplication extends Application {
 
     @Override
     public void start(Stage stage) throws IOException {
-        FXMLLoader fxmlLoader = new FXMLLoader(HelloApplication.class.getResource("adminViewBAK.fxml"));
+        FXMLLoader fxmlLoader = new FXMLLoader(HelloApplication.class.getResource("adminView.fxml"));
         scene = new Scene(fxmlLoader.load(), 1200, 720);
         stage.setTitle("Consola de Administración");
         stage.setScene(scene);
         stage.setAlwaysOnTop(true);
         stage.setMaximized(true);
         stage.show();
+        AdminController adminController = fxmlLoader.getController();
+        stage.setOnCloseRequest( event -> {
+            adminController.detenerLectura();          
+        });
     }
 
     static void setRoot(String fxml) throws IOException {

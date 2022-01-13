@@ -148,6 +148,29 @@ public class AdminController {
     // Varios
     Integer i = 0, j = 0, k = 0, l = 0;
     int numLecturasPPG = 0;
+    
+    public void escribirET(double izquierdo, double derecho, double time, int numPregunta) {
+    	try {
+            if (contadorLineasET == 0) {
+                //csvET.write("valor_promedio,ts,valor_promedio,valor_promedio,valor_promedio,evento\n");
+                csvET.write("left,right,timestamp,pregunta\n");
+                contadorLineasET += 1;
+            } else {
+            	if (izquierdo > 5 || derecho > 5) {
+            		contadorLineasET += 1;
+            	} else {
+            		contadorLineasET += 1;
+                    String dato = String.valueOf(izquierdo) + ","
+                            + String.valueOf(derecho) + ","
+                            + String.valueOf(time) + ","
+                            + String.valueOf(numPregunta);
+                    csvET.write(dato + "\n");
+            	}
+            }
+        } catch (IOException ex) {
+            System.out.println("Error al escribir archivo ET: " + ex);
+        }
+    }
 
     public void escribirET(String dato) {
         try {
@@ -214,12 +237,32 @@ public class AdminController {
             }
         }
     }
+    
+    int contadorLecturasET = 0;
+    
+    Process process;
+    
+    void detenerLectura() {
+    	if (process.isAlive()) {
+    		process.destroy();
+    		System.out.println("Proceso detenido ET");
+    	}
+    	try {
+			csvET.close();
+			System.out.println("Archivo de lecturas de ET cerrado");
+		} catch (IOException e) {
+			System.out.println("Error al cerrar el archivo de lecturas");
+		}
+    }
 
     private void obtenerDatosTobii() {
 
         try {
             //Process process = new ProcessBuilder("/home/edgar/Documentos/Git4N/dpr-cabinas/codigos-eyetracker/full_script_v2").start();
-            Process process = Runtime.getRuntime().exec("/home/edgar/Documentos/Git4N/dpr-cabinas/codigos-eyetracker/full_script_v2");
+            //process = Runtime.getRuntime().exec("/home/edgar/Documentos/Git4N/dpr-cabinas/codigos-eyetracker/full_script_v2");
+            String path = "src/main/resources/script_tobii/full_script_v2";
+            File file = new File(path);
+            process = Runtime.getRuntime().exec(file.getAbsolutePath());
             InputStream processInputStream = process.getInputStream();
             BufferedReader reader = new BufferedReader(new InputStreamReader(processInputStream));
             String line = reader.readLine();
@@ -227,34 +270,36 @@ public class AdminController {
             //double izquierdo = 0.0;
             while ((line = reader.readLine()) != null && !reader.equals("exit")) {
                 try {
-                    Thread.sleep(15);
+                    Thread.sleep(10);
                 } catch (InterruptedException ex) {
                     System.out.println("Error en thread de eye tracker: " + ex);
                 }
+            	
                 time = System.currentTimeMillis();
                 String[] parts = line.split(",");
                 double derecho = Double.valueOf(parts[0]);
                 double izquierdo = Double.valueOf(parts[1]);
-
-                if (derecho > 5 || izquierdo > 5) {
-
-                } else {
+                //System.out.println("IZQ: " + izquierdo + ", DER: " + derecho);
+                System.out.println("Contador: " + contadorLecturasET);
+                contadorLecturasET++;
                     if (numPregunta == 0 || numPregunta == 1 || numPregunta == 2) {
-                        escribirET(
+                        /*escribirET(
                                 String.valueOf(izquierdo) + ","
                                         + String.valueOf(derecho) + ","
                                         + String.valueOf(time) + ","
                                         + String.valueOf(0)
-                        );
+                        );*/
+                        escribirET(izquierdo,derecho,time,0);
                     } else {
-                        escribirET(
+                        /*escribirET(
                                 String.valueOf(izquierdo) + ","
                                         + String.valueOf(derecho) + ","
                                         + String.valueOf(time) + ","
                                         + String.valueOf(numPregunta)
-                        );
+                        );*/
+                        escribirET(izquierdo,derecho,time,numPregunta);
                     }
-                }
+                
 
                 //double suma = (derecho + izquierdo) / 2;
 
@@ -294,7 +339,7 @@ public class AdminController {
 
                             XYChart.Data<Number, Number> minder = seriesTOBIIDerecho.getData().get(0);
                             xAxisTOBII.setLowerBound(minder.getXValue().doubleValue());
-                            xAxisTOBII.setUpperBound(minder.getXValue().doubleValue() + 1500);
+                            xAxisTOBII.setUpperBound(minder.getXValue().doubleValue() + 3000);
 
                             if(seriesTOBIIIzquierdo.getData().size()>120) {
                                 seriesTOBIIIzquierdo.getData().remove(0,100);
@@ -396,6 +441,7 @@ public class AdminController {
             cargaCSVButton.setDisable(false);
             verdaderoFalso.setDisable(false);
             tabPane.getSelectionModel().selectFirst();
+            this.detenerLectura();
         });
         
         Thread t1 = new Thread() {
@@ -408,6 +454,7 @@ public class AdminController {
 
     @FXML
     private void salir(){
+    	
         System.exit(0);
     }
 

@@ -18,7 +18,7 @@ module mx.com.cuatronetworks.sensoresbpdp {
     requires PanamaHitek.Arduino;
     requires jssc;
     requires software.amazon.awssdk.core;
-    requires software.amazon.awssdk.services.s3;
+    //requires software.amazon.awssdk.services.s3;
     requires software.amazon.awssdk.services.polly;
     requires software.amazon.awssdk.auth;
     requires software.amazon.awssdk.regions;
