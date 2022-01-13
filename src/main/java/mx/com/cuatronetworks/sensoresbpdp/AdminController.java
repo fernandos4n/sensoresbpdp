@@ -339,11 +339,11 @@ public class AdminController {
 
                             XYChart.Data<Number, Number> minder = seriesTOBIIDerecho.getData().get(0);
                             xAxisTOBII.setLowerBound(minder.getXValue().doubleValue());
-                            xAxisTOBII.setUpperBound(minder.getXValue().doubleValue() + 3000);
+                            xAxisTOBII.setUpperBound(minder.getXValue().doubleValue() + 1500);
 
-                            if(seriesTOBIIIzquierdo.getData().size()>120) {
-                                seriesTOBIIIzquierdo.getData().remove(0,100);
-                                seriesTOBIIDerecho.getData().remove(0,100);
+                            if(seriesTOBIIIzquierdo.getData().size()>240) {
+                                seriesTOBIIIzquierdo.getData().remove(0,1);
+                                seriesTOBIIDerecho.getData().remove(0,1);
                             }
 
                             if(graficaTOBII.getData().size()<1) {

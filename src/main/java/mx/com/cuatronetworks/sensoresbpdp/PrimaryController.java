@@ -80,7 +80,7 @@ public class PrimaryController implements Runnable{
     
     boolean contesto = false;
     Integer minutos = 0, segundos = 0, milesimas = 0;
-    private int tiempoEspera = 1;
+    private int tiempoEspera = 7;
     Integer segundosxpregunta = tiempoEspera;
     String min = "", seg = "", mil = "";
     String tiempoInicio = "";
