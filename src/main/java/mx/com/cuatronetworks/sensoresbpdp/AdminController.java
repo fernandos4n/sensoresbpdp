@@ -84,9 +84,6 @@ public class AdminController {
     private CheckBox verdaderoFalso;
 
     @FXML
-    private TextField tiempoLecturaField;
-
-    @FXML
     private TextField intervaloCorrectasField;
 
     @FXML
@@ -116,7 +113,6 @@ public class AdminController {
 
     // Tiempos
     private int tiempo_calibracion = 60;
-    private Integer tiempo_lectura = 60;
     public long ultimoTiempo = 0;
     long date_ini;
     private Integer segundosLectura = 10;
@@ -192,8 +188,8 @@ public class AdminController {
         // Elementos de la interfaz gráfica
         nombreCSVLabel.setText("Ningún Archivo CSV seleccionado");
         iniciarButton.setDisable(true);
-        tiempoLecturaField.setText(tiempo_lectura.toString());
-        intervaloCorrectasField.setText("3");
+        intervaloCorrectasField.setText("0");
+        verdaderoFalso.setSelected(true);
         tabPane.getTabs().get(1).setDisable(true);
         tabPane.getTabs().get(2).setDisable(true);
         try {
@@ -260,7 +256,7 @@ public class AdminController {
         try {
             //Process process = new ProcessBuilder("/home/edgar/Documentos/Git4N/dpr-cabinas/codigos-eyetracker/full_script_v2").start();
             //process = Runtime.getRuntime().exec("/home/edgar/Documentos/Git4N/dpr-cabinas/codigos-eyetracker/full_script_v2");
-            String path = "src/main/resources/script_tobii/full_script_v2";
+            String path = "src/main/resources/script_tobii/full_script";
             File file = new File(path);
             process = Runtime.getRuntime().exec(file.getAbsolutePath());
             InputStream processInputStream = process.getInputStream();
@@ -297,7 +293,7 @@ public class AdminController {
                                         + String.valueOf(time) + ","
                                         + String.valueOf(numPregunta)
                         );*/
-                        escribirET(izquierdo,derecho,time,numPregunta);
+                        escribirET(izquierdo,derecho,time,numPregunta-2);
                     }
                 
 
@@ -371,7 +367,6 @@ public class AdminController {
     @FXML
     private void iniciarPreguntas() throws IOException {
         // Inicializar variables
-        tiempo_lectura = Integer.parseInt(tiempoLecturaField.getText());
         numLecturasPPG = 0;
         sumaLecturasPPG = 0.0;
         sumaCuadrados = 0.0;
@@ -410,7 +405,7 @@ public class AdminController {
         // Carga la segunda ventana
         FXMLLoader loader = new FXMLLoader(getClass().getResource("primary.fxml"));
         // Si tenemos la segunda pantalla
-        Screen pantalla2 = Screen.getScreens().size()>1?Screen.getScreens().get(1):Screen.getPrimary();
+        Screen pantalla2 = Screen.getScreens().size()>1?Screen.getScreens().get(0):Screen.getPrimary();
         Parent root = loader.load();
         PrimaryController preguntas = loader.getController();
         // Indicarle quien es su 'Padre'

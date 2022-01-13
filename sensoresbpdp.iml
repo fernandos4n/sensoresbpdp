@@ -72,27 +72,26 @@
     <orderEntry type="library" name="Maven: org.slf4j:slf4j-api:1.7.32" level="project" />
     <orderEntry type="library" name="Maven: org.slf4j:slf4j-simple:1.7.32" level="project" />
     <orderEntry type="library" name="Maven: org.jetbrains:annotations:22.0.0" level="project" />
-    <orderEntry type="library" name="Maven: software.amazon.awssdk:s3:2.17.46" level="project" />
-    <orderEntry type="library" name="Maven: software.amazon.awssdk:aws-xml-protocol:2.17.46" level="project" />
-    <orderEntry type="library" name="Maven: software.amazon.awssdk:aws-query-protocol:2.17.46" level="project" />
-    <orderEntry type="library" name="Maven: software.amazon.awssdk:protocol-core:2.17.46" level="project" />
-    <orderEntry type="library" name="Maven: software.amazon.awssdk:arns:2.17.46" level="project" />
-    <orderEntry type="library" name="Maven: software.amazon.awssdk:profiles:2.17.46" level="project" />
-    <orderEntry type="library" name="Maven: software.amazon.awssdk:sdk-core:2.17.46" level="project" />
+    <orderEntry type="library" name="Maven: software.amazon.awssdk:polly:2.17.102" level="project" />
+    <orderEntry type="library" name="Maven: software.amazon.awssdk:aws-json-protocol:2.17.102" level="project" />
+    <orderEntry type="library" name="Maven: software.amazon.awssdk:third-party-jackson-core:2.17.102" level="project" />
+    <orderEntry type="library" name="Maven: software.amazon.awssdk:json-utils:2.17.102" level="project" />
+    <orderEntry type="library" name="Maven: software.amazon.awssdk:protocol-core:2.17.102" level="project" />
+    <orderEntry type="library" name="Maven: software.amazon.awssdk:profiles:2.17.102" level="project" />
+    <orderEntry type="library" name="Maven: software.amazon.awssdk:sdk-core:2.17.102" level="project" />
     <orderEntry type="library" name="Maven: org.reactivestreams:reactive-streams:1.0.3" level="project" />
-    <orderEntry type="library" name="Maven: software.amazon.awssdk:auth:2.17.46" level="project" />
-    <orderEntry type="library" name="Maven: software.amazon.awssdk:json-utils:2.17.46" level="project" />
+    <orderEntry type="library" name="Maven: software.amazon.awssdk:auth:2.17.102" level="project" />
     <orderEntry type="library" name="Maven: software.amazon.eventstream:eventstream:1.0.1" level="project" />
-    <orderEntry type="library" name="Maven: software.amazon.awssdk:http-client-spi:2.17.46" level="project" />
-    <orderEntry type="library" name="Maven: software.amazon.awssdk:regions:2.17.46" level="project" />
-    <orderEntry type="library" name="Maven: software.amazon.awssdk:annotations:2.17.46" level="project" />
-    <orderEntry type="library" name="Maven: software.amazon.awssdk:utils:2.17.46" level="project" />
-    <orderEntry type="library" name="Maven: software.amazon.awssdk:aws-core:2.17.46" level="project" />
-    <orderEntry type="library" name="Maven: software.amazon.awssdk:metrics-spi:2.17.46" level="project" />
-    <orderEntry type="library" scope="RUNTIME" name="Maven: software.amazon.awssdk:apache-client:2.17.46" level="project" />
+    <orderEntry type="library" name="Maven: software.amazon.awssdk:http-client-spi:2.17.102" level="project" />
+    <orderEntry type="library" name="Maven: software.amazon.awssdk:regions:2.17.102" level="project" />
+    <orderEntry type="library" name="Maven: software.amazon.awssdk:annotations:2.17.102" level="project" />
+    <orderEntry type="library" name="Maven: software.amazon.awssdk:utils:2.17.102" level="project" />
+    <orderEntry type="library" name="Maven: software.amazon.awssdk:aws-core:2.17.102" level="project" />
+    <orderEntry type="library" name="Maven: software.amazon.awssdk:metrics-spi:2.17.102" level="project" />
+    <orderEntry type="library" scope="RUNTIME" name="Maven: software.amazon.awssdk:apache-client:2.17.102" level="project" />
     <orderEntry type="library" scope="RUNTIME" name="Maven: org.apache.httpcomponents:httpclient:4.5.13" level="project" />
-    <orderEntry type="library" scope="RUNTIME" name="Maven: org.apache.httpcomponents:httpcore:4.4.11" level="project" />
-    <orderEntry type="library" scope="RUNTIME" name="Maven: software.amazon.awssdk:netty-nio-client:2.17.46" level="project" />
+    <orderEntry type="library" scope="RUNTIME" name="Maven: org.apache.httpcomponents:httpcore:4.4.13" level="project" />
+    <orderEntry type="library" scope="RUNTIME" name="Maven: software.amazon.awssdk:netty-nio-client:2.17.102" level="project" />
     <orderEntry type="library" scope="RUNTIME" name="Maven: io.netty:netty-codec-http:4.1.68.Final" level="project" />
     <orderEntry type="library" scope="RUNTIME" name="Maven: io.netty:netty-codec-http2:4.1.68.Final" level="project" />
     <orderEntry type="library" scope="RUNTIME" name="Maven: io.netty:netty-codec:4.1.68.Final" level="project" />
@@ -105,9 +104,6 @@
     <orderEntry type="library" scope="RUNTIME" name="Maven: io.netty:netty-transport-native-unix-common:4.1.68.Final" level="project" />
     <orderEntry type="library" scope="RUNTIME" name="Maven: com.typesafe.netty:netty-reactive-streams-http:2.0.5" level="project" />
     <orderEntry type="library" scope="RUNTIME" name="Maven: com.typesafe.netty:netty-reactive-streams:2.0.5" level="project" />
-    <orderEntry type="library" name="Maven: software.amazon.awssdk:polly:2.17.46" level="project" />
-    <orderEntry type="library" name="Maven: software.amazon.awssdk:aws-json-protocol:2.17.46" level="project" />
-    <orderEntry type="library" name="Maven: software.amazon.awssdk:third-party-jackson-core:2.17.46" level="project" />
     <orderEntry type="library" name="Maven: org.knowm.xchart:xchart:3.8.1" level="project" />
     <orderEntry type="library" name="Maven: de.erichseifert.vectorgraphics2d:VectorGraphics2D:0.13" level="project" />
     <orderEntry type="library" name="Maven: de.rototor.pdfbox:graphics2d:0.32" level="project" />

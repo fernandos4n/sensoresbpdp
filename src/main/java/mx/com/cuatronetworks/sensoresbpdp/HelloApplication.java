@@ -4,6 +4,7 @@ import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.stage.Screen;
 import javafx.stage.Stage;
 
 import java.io.IOException;
@@ -18,6 +19,12 @@ public class HelloApplication extends Application {
         stage.setTitle("Consola de Administración");
         stage.setScene(scene);
         stage.setAlwaysOnTop(true);
+        // Si tenemos la segunda pantalla
+        Screen pantalla2 = Screen.getScreens().size()>1?Screen.getScreens().get(1):Screen.getPrimary();
+        stage.setX(pantalla2.getVisualBounds().getMinX());
+        stage.setY(pantalla2.getVisualBounds().getMinY());
+        stage.setWidth(pantalla2.getVisualBounds().getWidth());
+        stage.setHeight(pantalla2.getVisualBounds().getHeight());
         stage.setMaximized(true);
         stage.show();
         AdminController adminController = fxmlLoader.getController();
