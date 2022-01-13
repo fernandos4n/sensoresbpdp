@@ -221,7 +221,7 @@
                                     <FontAwesomeIconView fill="#f2ebeb" glyphName="CALCULATOR" />
                                  </graphic>
                               </Label>
-                              <LineChart fx:id="graficaTOBII" styleClass="graficaTOBII" title="Sensor TOBII" GridPane.columnSpan="2" GridPane.rowIndex="3">
+                              <LineChart fx:id="graficaTOBII" styleClass="graficaTOBII" title="Sensor TOBII" GridPane.columnSpan="4" GridPane.rowIndex="3">
                                 <xAxis>
                                   <NumberAxis label="Tiempo" side="BOTTOM" tickLabelFill="WHITE" fx:id="xAxisTOBII" />
                                 </xAxis>

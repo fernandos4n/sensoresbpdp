@@ -8,9 +8,14 @@ import java.util.List;
 
 import javax.swing.*;
 
+import javafx.animation.Animation;
+import javafx.animation.KeyFrame;
+import javafx.animation.KeyValue;
+import javafx.animation.Timeline;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.scene.Node;
+import javafx.util.Duration;
 import org.knowm.xchart.QuickChart;
 import org.knowm.xchart.SwingWrapper;
 import org.knowm.xchart.XYChart;
@@ -75,7 +80,7 @@ public class PrimaryController implements Runnable{
     
     boolean contesto = false;
     Integer minutos = 0, segundos = 0, milesimas = 0;
-    private int tiempoEspera = 7;
+    private int tiempoEspera = 1;
     Integer segundosxpregunta = tiempoEspera;
     String min = "", seg = "", mil = "";
     String tiempoInicio = "";
@@ -86,6 +91,8 @@ public class PrimaryController implements Runnable{
     MySwingWorker mySwingWorker;
     SwingWrapper<XYChart> sw;
     XYChart chart;
+
+    Timeline timeline;
 
     /**
      * Función que se ejecuta al inicializar la interfaz gráfica
@@ -102,6 +109,13 @@ public class PrimaryController implements Runnable{
         botonSi.setVisible(false);
         // Inicializar amazon Polly
         customPolly = new TextToSpeech(Region.US_EAST_1);
+        timeline = new Timeline(
+                new KeyFrame(Duration.ZERO, new KeyValue(barraProgreso.progressProperty(), 0)),
+                new KeyFrame(Duration.seconds(tiempoEspera), event -> {
+                    System.out.println("5 segundosTermina2");
+                }, new KeyValue(barraProgreso.progressProperty(), 1))
+        );
+        timeline.setCycleCount(Animation.INDEFINITE);
 	}
 
     /**
@@ -153,6 +167,7 @@ public class PrimaryController implements Runnable{
             //System.out.println("Tiempo : " + min + ":" + seg + ":" + mil);
             //count = count + 1;
             if (segundosxpregunta == tiempoEspera) {
+                timeline.stop();
                 segundosxpregunta = 0;
                 barraProgreso.setProgress(0.001);
                 System.out.println("Tiempo inicial: " + barraProgreso.getProgress());
@@ -200,7 +215,8 @@ public class PrimaryController implements Runnable{
                 }
             }
             value = segundosxpregunta * .14;
-            barraProgreso.setProgress(value);
+            //barraProgreso.setProgress(value);
+
             if (minutos == 12) {
                 ((Timer) (e.getSource())).stop();
             }
@@ -277,10 +293,7 @@ public class PrimaryController implements Runnable{
                 //modificarLabelAdmin(pregunta.getReactivo());
                 // Validar si es instrucción o espera
                 if(pregunta.getTema().equalsIgnoreCase(Pregunta.INSTRUCCION)){
-                    instruccionActual.setValue("");
-                }else if(pregunta.getTema().equalsIgnoreCase(Pregunta.ESPERA)){
                     instruccionActual.setValue("Instrucción");
-                    // TODO: Hacer la espera
                 }else{
                     if(intervaloCorrectas != 0){
                         if (intQuestion % intervaloCorrectas == 0) {
@@ -311,11 +324,12 @@ public class PrimaryController implements Runnable{
                     System.out.println("Inicia Reproduccion");
                     botonNo.setDisable(true);
                     botonSi.setDisable(true);
+
                 }
                 @Override
                 public void playbackFinished(PlaybackEvent evt) {
                     System.out.println("Termina Reproduccion");
-                    boolean noPregunta = pregunta.getTema().equalsIgnoreCase(Pregunta.INSTRUCCION) || pregunta.getTema().equalsIgnoreCase(Pregunta.ESPERA);
+                    boolean noPregunta = pregunta.getTema().equalsIgnoreCase(Pregunta.INSTRUCCION);
                     botonNo.setVisible(!noPregunta);
                     botonSi.setVisible(!noPregunta);
                     botonSi.setDisable(noPregunta);
@@ -324,6 +338,7 @@ public class PrimaryController implements Runnable{
                         isPreguntando = true;
                         enviarBandera(isPreguntando);
                     }
+                    timeline.play();
                 }
             });
             Thread t1 = new Thread() {

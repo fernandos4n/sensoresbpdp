@@ -274,9 +274,6 @@ public class PrimaryControllerBAK implements Runnable{
                 // Validar si es instrucción o espera
                 if(pregunta.getTema().equalsIgnoreCase(Pregunta.INSTRUCCION)){
                     instruccionActual.setValue("");
-                }else if(pregunta.getTema().equalsIgnoreCase(Pregunta.ESPERA)){
-                    instruccionActual.setValue("Instrucción");
-                    // TODO: Hacer la espera
                 }else{
                     if(intervaloCorrectas != 0){
                         if (intQuestion % intervaloCorrectas == 0) {
@@ -311,7 +308,7 @@ public class PrimaryControllerBAK implements Runnable{
                 @Override
                 public void playbackFinished(PlaybackEvent evt) {
                     System.out.println("Termina Reproduccion");
-                    boolean noPregunta = pregunta.getTema().equalsIgnoreCase(Pregunta.INSTRUCCION) || pregunta.getTema().equalsIgnoreCase(Pregunta.ESPERA);
+                    boolean noPregunta = pregunta.getTema().equalsIgnoreCase(Pregunta.INSTRUCCION);
                     botonNo.setVisible(!noPregunta);
                     botonSi.setVisible(!noPregunta);
                     botonSi.setDisable(noPregunta);

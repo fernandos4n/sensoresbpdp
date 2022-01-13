@@ -98,7 +98,7 @@
                                     <FontAwesomeIconView fill="#f2ebeb" glyphName="TIMES" />
                                  </graphic>
                               </Button>
-                              <GridPane gridLinesVisible="true" style="-fx-background-color: #0139d8;" GridPane.columnSpan="4" GridPane.rowIndex="4">
+                              <GridPane gridLinesVisible="true" style="-fx-background-color: #3B3838;" GridPane.columnSpan="4" GridPane.rowIndex="4">
                                 <columnConstraints>
                                   <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
                                   <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
@@ -212,7 +212,7 @@
                                   <NumberAxis fx:id="yAxisPPG" label="Valor de Lectura" side="LEFT" tickLabelFill="WHITE" />
                                 </yAxis>
                               </LineChart>
-                              <Label alignment="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" styleClass="subtitulo" text="Lecturas en tiempo real" textAlignment="CENTER" GridPane.columnSpan="2" GridPane.rowIndex="2">
+                              <Label alignment="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" styleClass="titulo" text="Lecturas en tiempo real" textAlignment="CENTER" GridPane.columnSpan="2" GridPane.rowIndex="2">
                                  <font>
                                     <Font size="20.0" />
                                  </font>
@@ -220,7 +220,7 @@
                                     <FontAwesomeIconView fill="#f2ebeb" glyphName="SIGNAL" />
                                  </graphic>
                               </Label>
-                              <Label alignment="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" styleClass="subtitulo" text="Gráficos de control" textAlignment="CENTER" GridPane.columnIndex="2" GridPane.columnSpan="2" GridPane.rowIndex="2">
+                              <Label alignment="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" styleClass="titulo" text="Gráficos de control" textAlignment="CENTER" GridPane.columnIndex="2" GridPane.columnSpan="2" GridPane.rowIndex="2">
                                  <font>
                                     <Font size="20.0" />
                                  </font>

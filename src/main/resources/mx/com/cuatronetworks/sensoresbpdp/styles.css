@@ -190,7 +190,7 @@ ChoiceBox {
 .progress-bar .bar {
     -fx-border-radius: 5px;
     -fx-background-radius: 5px;
-    -fx-background-color: linear-gradient(to left, #0f3443, #34e89e);
+    -fx-background-color: #126df4;
 }
 
 /************************************ G R Á F I C A S ***********************************/
