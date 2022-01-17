@@ -3,11 +3,13 @@ Fernando Sánchez 2021
 **/
 
 .root {
-     -fx-background-color: #031123;
+     -fx-background-color: linear-gradient(#204686, #000927);
 }
 
 .label {
     -fx-text-fill: #fff;
+    -fx-background-radius: 15px;
+    -fx-border-radius: 15px;
 }
 
 .text-input {
@@ -23,61 +25,63 @@ Fernando Sánchez 2021
 
 /*17 Dic 2021 - FSC*/
 
-Button {
+Button {/*
+    -fx-background-color:
+        linear-gradient(#f2f2f2, #d6d6d6),
+        linear-gradient(#fcfcfc 0%, #d9d9d9 20%, #d6d6d6 100%),
+        linear-gradient(#dddddd 0%, #f6f6f6 50%);
+    -fx-background-radius: 8,7,6;
+    -fx-background-insets: 0,1,2;
+    -fx-text-fill: black;
+    -fx-effect: dropshadow( three-pass-box , rgba(0,0,0,0.6) , 5, 0.0 , 0 , 1 );*/
+
 	-fx-border-radius: 15px;
 	-fx-background-radius: 15px;
-	-fx-background-color: #126df4;
+	-fx-background-color: linear-gradient(#126df4, #0d0957);
 	-fx-border-color: #031123;
-	-fx-border-width: 2px;
 	-fx-text-fill: #fff;
+	-fx-effect: dropshadow( three-pass-box , rgba(0,137,255,0.9) , 10, 0.0 , 0 , 2);
 }
 
 Button:hover{
-	-fx-border-color: #f9d73c;
 	-fx-text-fill: white;
 }
 
 Button:pressed, Button:default:hover:pressed{
-	-fx-background-color: #0039da;
+	-fx-background-color: linear-gradient(#0d0957, #126df4);
 	-fx-text-fill: white;
 }
 
 TextField, PasswordField {
     -fx-border-radius: 15px;
+    -fx-border-color: #0039da;
     -fx-background-radius: 15px;
 }
 
-ChoiceBox {
-	-fx-background-color: #fff;
-	-fx-border-color: #00833D;
-	-fx-border-radius: 15px;
+TextField:focused {
+    -fx-border-width: 2;
 }
 
-ChoiceBox:pressed, ChoiceBox:default:hover:pressed:focused, CheckBox:focused:hover {
-    -fx-border-color: #4DFFB2;
+.check-box .box {
+    -fx-background-color: white;
+    -fx-border-color: #126df4;
+    -fx-border-radius: 3px;
 }
 
-ComboBox {
-	-fx-background-color: #fff;
-	-fx-border-color: #00833D;
-	-fx-border-radius: 15px;
+.check-box:selected .mark {
+    -fx-background-color: #FFF;
 }
 
-ComboBox:pressed, ComboBox:default:hover:pressed:focused, ComboBox:focused:hover {
-    -fx-border-color: #4DFFB2;
-}
-
-ChoiceBox {
-	-fx-background-color: #fff;
-	-fx-border-color: #00833D;
-	-fx-border-radius: 15px;
+.check-box:selected .box {
+    -fx-background-color: #126df4;
 }
 
 /************************************ L O G I N ***********************************/
 
 .boton-iniciar{
-	-fx-background-color: #00833D;
+	-fx-background-color: linear-gradient(#00ff66, #004e24);
 	-fx-text-fill: #fff;
+	-fx-effect: dropshadow( three-pass-box , rgba(0,255,149,0.9) , 10, 0.0 , 0 , 2);
 }
 
 .boton-iniciar:hover{
@@ -85,20 +89,38 @@ ChoiceBox {
 	-fx-text-fill: #fff;
 }
 
+.boton-iniciar:pressed{
+    -fx-background-color: linear-gradient(#004E24, #00FF66);
+}
+
+.boton-no{
+    -fx-background-color: linear-gradient(#FF3300, #4E0000);
+	-fx-border-color: #fe2712;
+	-fx-text-fill: #fff;
+	-fx-effect: dropshadow( three-pass-box , rgba(254,39,18,0.9) , 10, 0.0 , 0 , 2);
+}
+
+.boton-no:pressed, .boton-no:default:hover:pressed{
+	-fx-background-color: linear-gradient(#4E0000, #FF3300);
+}
+
 .boton-cerrar{
-    -fx-background-color: #fe2712;
+    -fx-background-color: none;
+    -fx-effect: dropshadow( three-pass-box , rgba(254,39,18,0.9) , 10, 0.0 , 0 , 2);
 	-fx-border-color: #fe2712;
 	-fx-text-fill: #fff;
 }
 
 .boton-cerrar:hover{
-	-fx-border-color: #000;
+    -fx-border-color: #fe2712;
+    -fx-background-color: #fe2712;
+    -fx-text-fill: #fff;
 }
 
 .boton-cerrar:pressed, .boton-cerrar:default:hover:pressed{
-	-fx-border-color: #fe2712;
+	-fx-border-color: #031123;
 	-fx-background-color: #fe2712;
-	-fx-text-fill: #000;
+    -fx-text-fill: #fff;
 }
 
 /************************************ G E N E R A L E S ***********************************/
@@ -143,6 +165,11 @@ ChoiceBox {
 
 .tab-pane .tab-header-area .tab-header-background {
     -fx-opacity: 1;
+}
+
+.tab-pane>*.tab-header-area>*.tab-header-background
+{
+    -fx-background-color: -fx-outer-border, -fx-text-box-border, none;
 }
 
 .tab {
@@ -195,8 +222,20 @@ ChoiceBox {
 
 /************************************ G R Á F I C A S ***********************************/
 .graficaPPG .default-color0.chart-series-line { -fx-stroke: #00ff00; }
-
 .graficaGSR .default-color0.chart-series-line { -fx-stroke: #0000ff; }
 
-.graficaTOBII .default-color0.chart-series-line { -fx-stroke: #F39C12; }
-.graficaTOBII .default-color1.chart-series-line { -fx-stroke: #76448A; }
+.graficaTOBII .chart-plot-background { -fx-background-color: #3B3838; }
+
+.graficaTOBII .default-color0.chart-series-line { -fx-stroke: #00ff40; }
+.graficaTOBII .default-color1.chart-series-line { -fx-stroke: #ff8800; }
+
+.graficaTOBII .default-color0.chart-line-symbol { -fx-background-color: #00ff40; }
+.graficaTOBII .default-color1.chart-line-symbol { -fx-background-color: #ff8800; }
+
+.graficaTOBII .chart-vertical-grid-lines { -fx-stroke: none; }
+
+.graficaTOBII .chart-legend {
+   -fx-background-color:  #000;
+   -fx-stroke: #daa520;
+   -fx-text-fill: #fff;
+}

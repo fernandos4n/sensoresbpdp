@@ -357,11 +357,26 @@ public class AdminControllerBAK {
         }
     }
 
+    Process process;
+
+    void detenerLectura() {
+        if (process.isAlive()) {
+            process.destroy();
+            System.out.println("Proceso detenido ET");
+        }
+        try {
+            csvET.close();
+            System.out.println("Archivo de lecturas de ET cerrado");
+        } catch (IOException e) {
+            System.out.println("Error al cerrar el archivo de lecturas");
+        }
+    }
+
     private void obtenerDatosTobii() {
 
         try {
             //Process process = new ProcessBuilder("/home/edgar/Documentos/Git4N/dpr-cabinas/codigos-eyetracker/full_script_v2").start();
-            Process process = Runtime.getRuntime().exec("/home/edgar/Documentos/Git4N/dpr-cabinas/codigos-eyetracker/full_script_v2");
+            process = Runtime.getRuntime().exec("/home/edgar/Documentos/Git4N/dpr-cabinas/codigos-eyetracker/full_script_v2");
             InputStream processInputStream = process.getInputStream();
             BufferedReader reader = new BufferedReader(new InputStreamReader(processInputStream));
             String line = reader.readLine();

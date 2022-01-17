@@ -133,6 +133,16 @@ public class AdminController {
     XYChart.Series<Number, Number> seriesTOBIIDerecho;
     XYChart.Series<Number, Number> seriesTOBIIIzquierdo;
 
+    // Arduino
+    PanamaHitek_Arduino arduinoPPG = new PanamaHitek_Arduino();
+    PanamaHitek_Arduino arduinoGSR = new PanamaHitek_Arduino();
+
+    // Puertos y Bauding
+    private final String puertoSerialGSR = "/dev/ttyUSB0";
+    private final String puertoSerialPPG = "/dev/ttyACM0";
+    private final int baudingPPG = 115200;
+    private final int baudingGSR = 115200;
+
     // Archivos CSV para Escritura
     private FileWriter csvET;
     private FileWriter contadorTiempos;
@@ -227,6 +237,7 @@ public class AdminController {
                 nombreCSVLabel.setText(nombreCSVLabel.getText() + "\n" + totalPreguntas + " Reactivos Cargados");
                 iniciarButton.setDisable(false);
                 tabPane.getTabs().get(1).setDisable(false);
+                tabPane.getTabs().get(2).setDisable(false);
             }catch (Exception e){
                 e.printStackTrace();
                 nombreCSVLabel.setText("Archivo Inválido!");
@@ -251,11 +262,57 @@ public class AdminController {
 		}
     }
 
+    /* SERIALPORT LISTENERS */
+    /**
+     * Serial Listener para GSR
+     */
+    SerialPortEventListener ListenerGSR = new SerialPortEventListener() {
+        @Override
+        public void serialEvent(SerialPortEvent spe) {
+            try {
+                if (arduinoGSR.isMessageAvailable()) {
+                    Double data;
+                    time = System.currentTimeMillis();
+                    try {
+                        data = Double.parseDouble(arduinoGSR.printMessage());
+                        int value = (int) Math.round(data);
+                        //TODO: Aki guardas al CSV
+                    } catch (ArduinoException | NumberFormatException | SerialPortException ex) {
+                        System.out.println("Error data: " + ex);
+                    }
+                }
+            } catch (ArduinoException | SerialPortException ex) {
+                Logger.getLogger(AdminControllerBAK.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+    };
+
+    /**
+     * Serial Listener para PPG
+     */
+    SerialPortEventListener ListenerPPG = new SerialPortEventListener() {
+        @Override
+        public void serialEvent(SerialPortEvent spe) {
+            k += 1;
+            try {
+                if(arduinoPPG.isMessageAvailable()) {
+                    i++;
+                    Double data = 0.0;
+                    time = System.currentTimeMillis();
+                    long current_time = (new Date()).getTime();
+                    long calculo = (current_time - date_ini) / 1000;
+                    //TODO: Aki eskribes el CSV
+                }
+            } catch (ArduinoException | SerialPortException ex) {
+                Logger.getLogger(AdminController.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+    };
+
     private void obtenerDatosTobii() {
 
         try {
-            //Process process = new ProcessBuilder("/home/edgar/Documentos/Git4N/dpr-cabinas/codigos-eyetracker/full_script_v2").start();
-            //process = Runtime.getRuntime().exec("/home/edgar/Documentos/Git4N/dpr-cabinas/codigos-eyetracker/full_script_v2");
+            //TODO: aki le pones la v2
             String path = "src/main/resources/script_tobii/full_script";
             File file = new File(path);
             process = Runtime.getRuntime().exec(file.getAbsolutePath());
@@ -266,7 +323,7 @@ public class AdminController {
             //double izquierdo = 0.0;
             while ((line = reader.readLine()) != null && !reader.equals("exit")) {
                 try {
-                    Thread.sleep(10);
+                    Thread.sleep(2); //Sleep de 2 segundos
                 } catch (InterruptedException ex) {
                     System.out.println("Error en thread de eye tracker: " + ex);
                 }
@@ -445,6 +502,15 @@ public class AdminController {
             }
         };
         t1.start();
+
+        try {
+            arduinoPPG.arduinoRX(puertoSerialPPG, baudingPPG, ListenerPPG);
+            arduinoGSR.arduinoRX(puertoSerialGSR, baudingGSR, ListenerGSR);
+        } catch (ArduinoException ex) {
+            Logger.getLogger(GraficasMedicion.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (SerialPortException ex) {
+            Logger.getLogger(GraficasMedicion.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     @FXML

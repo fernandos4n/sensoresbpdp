@@ -28,8 +28,9 @@ public class HelloApplication extends Application {
         stage.setMaximized(true);
         stage.show();
         AdminController adminController = fxmlLoader.getController();
+        //AdminControllerBAK adminController = fxmlLoader.getController();
         stage.setOnCloseRequest( event -> {
-            adminController.detenerLectura();          
+            adminController.detenerLectura();
         });
     }
 

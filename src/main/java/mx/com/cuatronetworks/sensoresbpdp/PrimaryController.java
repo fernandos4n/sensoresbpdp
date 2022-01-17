@@ -108,7 +108,8 @@ public class PrimaryController implements Runnable{
         botonNo.setVisible(false);
         botonSi.setVisible(false);
         // Inicializar amazon Polly
-        customPolly = new TextToSpeech(Region.US_EAST_1);
+        // Descomentar customPolly
+        //customPolly = new TextToSpeech(Region.US_EAST_1);
         timeline = new Timeline(
                 new KeyFrame(Duration.ZERO, new KeyValue(barraProgreso.progressProperty(), 0)),
                 new KeyFrame(Duration.seconds(tiempoEspera), event -> {
