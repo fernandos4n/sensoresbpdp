@@ -145,6 +145,8 @@ public class AdminController {
 
     // Archivos CSV para Escritura
     private FileWriter csvET;
+    private FileWriter csvPPG;
+    private FileWriter csvGSR;
     private FileWriter contadorTiempos;
     private int contadorLineasPPG = 0;
     private int contadorLineasGSR = 0;
@@ -154,6 +156,35 @@ public class AdminController {
     // Varios
     Integer i = 0, j = 0, k = 0, l = 0;
     int numLecturasPPG = 0;
+    
+    public void escribirPPG(int valor, double time, int numPregunta) {
+        try {
+            if (contadorLineasPPG == 0) {
+                csvPPG.write("valor,timestamp,pregunta\n");
+                contadorLineasPPG += 1;
+            } else {
+            	String dato = String.valueOf(valor) + ","
+                        + String.valueOf(time) + ","
+                        + String.valueOf(numPregunta);
+                csvPPG.write(dato + "\n");
+            }
+        } catch (IOException ex) {
+            System.out.println("Error al escribir archivo PPG: " + ex);
+        }
+    }
+
+    public void escribirGSR(int valor, double time, int numPregunta) {
+        try {
+            if (contadorLineasGSR == 0) {
+                csvGSR.write("valor,timestamp,pregunta\n");
+                contadorLineasGSR += 1;
+            } else {
+                csvGSR.write(dato + "\n");
+            }
+        } catch (IOException ex) {
+            System.out.println("Error al escribir archivo GSR: " + ex);
+        }
+    }
     
     public void escribirET(double izquierdo, double derecho, double time, int numPregunta) {
     	try {
@@ -204,6 +235,8 @@ public class AdminController {
         tabPane.getTabs().get(2).setDisable(true);
         try {
             csvET = new FileWriter("et_" + time + ".csv");
+            csvGSR = new FileWriter("gsr_" + time + ".csv");
+            csvPPG = new FileWriter("ppg_" + time + ".csv");
         } catch (IOException e) {
             e.printStackTrace();
         }
