@@ -138,8 +138,8 @@ public class AdminController {
     PanamaHitek_Arduino arduinoGSR = new PanamaHitek_Arduino();
 
     // Puertos y Bauding
-    private final String puertoSerialGSR = "/dev/ttyUSB0";
-    private final String puertoSerialPPG = "/dev/ttyACM0";
+    private final String puertoSerialGSR = "/dev/ttyACM0";
+    private final String puertoSerialPPG = "/dev/ttyUSB0";
     private final int baudingPPG = 115200;
     private final int baudingGSR = 115200;
 
@@ -157,7 +157,7 @@ public class AdminController {
     Integer i = 0, j = 0, k = 0, l = 0;
     int numLecturasPPG = 0;
     
-    public void escribirPPG(int valor, double time, int numPregunta) {
+    public void escribirPPG(int valor, long time, int numPregunta) {
         try {
             if (contadorLineasPPG == 0) {
                 csvPPG.write("valor,timestamp,pregunta\n");
@@ -166,6 +166,7 @@ public class AdminController {
             	String dato = String.valueOf(valor) + ","
                         + String.valueOf(time) + ","
                         + String.valueOf(numPregunta);
+                System.out.println("dato: " + dato);
                 csvPPG.write(dato + "\n");
             }
         } catch (IOException ex) {
@@ -173,12 +174,15 @@ public class AdminController {
         }
     }
 
-    public void escribirGSR(int valor, double time, int numPregunta) {
+    public void escribirGSR(int valor, long time, int numPregunta) {
         try {
             if (contadorLineasGSR == 0) {
                 csvGSR.write("valor,timestamp,pregunta\n");
                 contadorLineasGSR += 1;
             } else {
+                String dato = String.valueOf(valor) + ","
+                        + String.valueOf(time) + ","
+                        + String.valueOf(numPregunta);
                 csvGSR.write(dato + "\n");
             }
         } catch (IOException ex) {
@@ -186,10 +190,9 @@ public class AdminController {
         }
     }
     
-    public void escribirET(double izquierdo, double derecho, double time, int numPregunta) {
+    public void escribirET(double izquierdo, double derecho, long time, int numPregunta) {
     	try {
             if (contadorLineasET == 0) {
-                //csvET.write("valor_promedio,ts,valor_promedio,valor_promedio,valor_promedio,evento\n");
                 csvET.write("left,right,timestamp,pregunta\n");
                 contadorLineasET += 1;
             } else {
@@ -203,21 +206,6 @@ public class AdminController {
                             + String.valueOf(numPregunta);
                     csvET.write(dato + "\n");
             	}
-            }
-        } catch (IOException ex) {
-            System.out.println("Error al escribir archivo ET: " + ex);
-        }
-    }
-
-    public void escribirET(String dato) {
-        try {
-            if (contadorLineasET == 0) {
-                //csvET.write("valor_promedio,ts,valor_promedio,valor_promedio,valor_promedio,evento\n");
-                csvET.write("left,right,timestamp,pregunta\n");
-                contadorLineasET += 1;
-            } else {
-                contadorLineasET += 1;
-                csvET.write(dato + "\n");
             }
         } catch (IOException ex) {
             System.out.println("Error al escribir archivo ET: " + ex);
@@ -289,6 +277,8 @@ public class AdminController {
     	}
     	try {
 			csvET.close();
+            csvGSR.close();
+            csvPPG.close();
 			System.out.println("Archivo de lecturas de ET cerrado");
 		} catch (IOException e) {
 			System.out.println("Error al cerrar el archivo de lecturas");
@@ -309,7 +299,7 @@ public class AdminController {
                     try {
                         data = Double.parseDouble(arduinoGSR.printMessage());
                         int value = (int) Math.round(data);
-                        //TODO: Aki guardas al CSV
+                        escribirGSR(value, time, numPregunta);
                     } catch (ArduinoException | NumberFormatException | SerialPortException ex) {
                         System.out.println("Error data: " + ex);
                     }
@@ -331,10 +321,12 @@ public class AdminController {
                 if(arduinoPPG.isMessageAvailable()) {
                     i++;
                     Double data = 0.0;
+                    data = Double.parseDouble(arduinoPPG.printMessage());
+                    int value = (int) Math.round(data);
                     time = System.currentTimeMillis();
                     long current_time = (new Date()).getTime();
                     long calculo = (current_time - date_ini) / 1000;
-                    //TODO: Aki eskribes el CSV
+                    escribirPPG(value, time, numPregunta);
                 }
             } catch (ArduinoException | SerialPortException ex) {
                 Logger.getLogger(AdminController.class.getName()).log(Level.SEVERE, null, ex);
@@ -356,7 +348,7 @@ public class AdminController {
             //double izquierdo = 0.0;
             while ((line = reader.readLine()) != null && !reader.equals("exit")) {
                 try {
-                    Thread.sleep(2); //Sleep de 2 segundos
+                    Thread.sleep(10); //Sleep de 2 segundos
                 } catch (InterruptedException ex) {
                     System.out.println("Error en thread de eye tracker: " + ex);
                 }
@@ -365,8 +357,6 @@ public class AdminController {
                 String[] parts = line.split(",");
                 double derecho = Double.valueOf(parts[0]);
                 double izquierdo = Double.valueOf(parts[1]);
-                //System.out.println("IZQ: " + izquierdo + ", DER: " + derecho);
-                System.out.println("Contador: " + contadorLecturasET);
                 contadorLecturasET++;
                     if (numPregunta == 0 || numPregunta == 1 || numPregunta == 2) {
                         /*escribirET(
@@ -538,7 +528,7 @@ public class AdminController {
 
         try {
             arduinoPPG.arduinoRX(puertoSerialPPG, baudingPPG, ListenerPPG);
-            arduinoGSR.arduinoRX(puertoSerialGSR, baudingGSR, ListenerGSR);
+            //arduinoGSR.arduinoRX(puertoSerialGSR, baudingGSR, ListenerGSR);
         } catch (ArduinoException ex) {
             Logger.getLogger(GraficasMedicion.class.getName()).log(Level.SEVERE, null, ex);
         } catch (SerialPortException ex) {
