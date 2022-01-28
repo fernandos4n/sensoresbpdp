@@ -24,6 +24,7 @@ module mx.com.cuatronetworks.sensoresbpdp {
     requires software.amazon.awssdk.regions;
     requires org.knowm.xchart;
     requires de.jensd.fx.glyphs.fontawesome;
+    requires log4j;
 
     opens mx.com.cuatronetworks.sensoresbpdp to javafx.fxml;
     exports mx.com.cuatronetworks.sensoresbpdp;

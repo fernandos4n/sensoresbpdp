@@ -1,7 +1,6 @@
 Riesgo,Tema,Reactivo,Respuesta esperada
-Ninguno,Instruccion,Prueba de números ,X
 Ninguno,Instruccion,Piensa un número entre 2 y 9 y escríbelo. ,X
-Ninguno,Instruccion,"Esta prueba te hará una serie de preguntas tipo falso o verdadero para tratar de determinar el número (entre 2 y 9) que has elegido. Cuando te pregunten acerca del número que escogiste, es necesario que mientas. Por favor haz un esfuerzo por parecer lo más veraz posible mientras respondes a las preguntas sobre tu número. ",X
+Ninguno,Instruccion,"Esta prueba te hará una serie de preguntas tipo falso o verdadero para tratar de determinar el número entre 2 y 9 que has elegido. Cuando te pregunten acerca del número que escogiste, es necesario que mientas. Por favor haz un esfuerzo por parecer lo más veraz posible mientras respondes a las preguntas sobre tu número. ",X
 Ninguno,Números,No apunté el número 1,X
 Ninguno,Números,Dos es el número que escogí,X
 Ninguno,Números,Un número que no escribí fue el 3,X
@@ -20,7 +19,7 @@ Ninguno,Números,No apunté el número 5 ,X
 Ninguno,Números,Seis es el número que escogí ,X
 Ninguno,Números,No elegí el número 7,X
 Ninguno,Números,Ocho es el número que yo escogí ,X
-Ninguno,Números,Si escogí el número 9 ,X
+Ninguno,Números,Sí escogí el número 9 ,X
 Ninguno,Números,No fue elegido el número 10 por mí,X
 Ninguno,Instruccion,Por favor relájate 7 segundos ,X
 Ninguno,Instruccion,La próxima sesión tendrá preguntas de conocimiento general. ,X

@@ -4,39 +4,29 @@ import com.opencsv.bean.CsvToBeanBuilder;
 import com.panamahitek.ArduinoException;
 import com.panamahitek.PanamaHitek_Arduino;
 import javafx.application.Platform;
+import javafx.beans.binding.Bindings;
+import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.XYChart;
-import javafx.scene.control.Button;
-import javafx.scene.control.CheckBox;
-import javafx.scene.control.Label;
+import javafx.scene.control.*;
 import javafx.scene.chart.NumberAxis;
-import javafx.scene.control.TabPane;
-import javafx.scene.control.TextField;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.FileChooser;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 import jssc.SerialPortEvent;
 import jssc.SerialPortEventListener;
 import jssc.SerialPortException;
 import mx.com.cuatronetworks.sensoresbpdp.model.Pregunta;
-import org.jfree.chart.JFreeChart;
-import org.jfree.chart.axis.DateAxis;
-import org.jfree.chart.fx.ChartViewer;
-import org.jfree.chart.plot.CombinedDomainXYPlot;
-import org.jfree.chart.plot.PlotOrientation;
-import org.jfree.chart.plot.XYPlot;
-import org.jfree.chart.renderer.xy.StandardXYItemRenderer;
-import org.jfree.chart.renderer.xy.XYItemRenderer;
-import org.jfree.data.xy.XYDataset;
+import org.apache.log4j.Logger;
 import org.jfree.data.xy.XYSeries;
-import org.jfree.data.xy.XYSeriesCollection;
 
-import java.awt.Color;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -47,11 +37,10 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
+import java.util.Optional;
 
 public class AdminController {
+    static Logger logger = Logger.getLogger(AdminController.class);
     // Elementos JAVAFX
     @FXML
     private Label nombreCSVLabel;
@@ -64,6 +53,9 @@ public class AdminController {
 
     @FXML
     private Label preguntaLabel;
+
+    @FXML
+    private Button calibrarButton;
 
     @FXML
     private Button cargaCSVButton;
@@ -94,8 +86,15 @@ public class AdminController {
 
     @FXML
     private LineChart<Number, Number> graficaTOBII;
-    
-    long time = System.currentTimeMillis();
+
+    @FXML
+    private NumberAxis xAxisTOBIIGaze;
+
+    @FXML
+    private NumberAxis yAxisTOBIIGaze;
+
+    @FXML
+    private LineChart<Number, Number> graficaTOBIIGaze;
 
     // Markers
     final List<XYSeries> markers = new ArrayList<XYSeries>();
@@ -105,17 +104,16 @@ public class AdminController {
     private List<Double> lecturasPPG;
 
     // Preguntas
-    private int numPregunta;
+    private SimpleIntegerProperty numPregunta = new SimpleIntegerProperty();
+    private SimpleStringProperty preguntaActual = new SimpleStringProperty();
     private List<Pregunta> preguntasList;
     private int totalPreguntas = 0;
     public static int contador_preguntas = 1;
-    public static int respuesta = 0;
+    private Boolean respuesta = false;
+    Stage stagePreguntas;
 
     // Tiempos
-    private int tiempo_calibracion = 60;
-    public long ultimoTiempo = 0;
     long date_ini;
-    private Integer segundosLectura = 10;
     private Double media = 0.0;
     private Double sumaCuadrados = 0.0;
     private Double varianza = 0.0;
@@ -123,21 +121,34 @@ public class AdminController {
     // Controlador Padre
     HelloApplication mainApp;
 
+    // Controlador Hijo
+    PrimaryController preguntas;
+
     // Seleccionar archivo
     FileChooser fileChooser;
 
     // Archivo CSV para Lectura
     File csvFile;
 
+    // Proceso
+    Process tobiiProcess;
+
     // Elementos Gráfica TOBII
     XYChart.Series<Number, Number> seriesTOBIIDerecho;
     XYChart.Series<Number, Number> seriesTOBIIIzquierdo;
 
-    // Arduino
+    // Elementos Gráfica Gaze
+    XYChart.Series<Number, Number> seriesTOBIIRightGaze;
+    XYChart.Series<Number, Number> seriesTOBIILeftGaze;
+
+    // EyeTracker
+    private boolean isCalibrado = false;
+
+    // Arduino GSR y PPG
     PanamaHitek_Arduino arduinoPPG = new PanamaHitek_Arduino();
     PanamaHitek_Arduino arduinoGSR = new PanamaHitek_Arduino();
 
-    // Puertos y Bauding
+    // Puertos y Bauding Sensores GSR y PPG
     private final String puertoSerialGSR = "/dev/ttyACM0";
     private final String puertoSerialPPG = "/dev/ttyUSB0";
     private final int baudingPPG = 115200;
@@ -147,14 +158,15 @@ public class AdminController {
     private FileWriter csvET;
     private FileWriter csvPPG;
     private FileWriter csvGSR;
-    private FileWriter contadorTiempos;
     private int contadorLineasPPG = 0;
     private int contadorLineasGSR = 0;
     private int contadorLineasET = 0;
-    private int contadorLineasTiempos = 0;
+
+    // Tiempo para nombres de archivos
+    long currentTime;
 
     // Varios
-    Integer i = 0, j = 0, k = 0, l = 0;
+    Integer i = 0, k = 0;
     int numLecturasPPG = 0;
     
     public void escribirPPG(int valor, long time, int numPregunta) {
@@ -190,48 +202,46 @@ public class AdminController {
         }
     }
     
-    public void escribirET(double izquierdo, double derecho, long time, int numPregunta) {
-    	try {
-            if (contadorLineasET == 0) {
-                csvET.write("left,right,timestamp,pregunta\n");
-                contadorLineasET += 1;
-            } else {
-            	if (izquierdo > 5 || derecho > 5) {
-            		contadorLineasET += 1;
-            	} else {
-            		contadorLineasET += 1;
-                    String dato = String.valueOf(izquierdo) + ","
-                            + String.valueOf(derecho) + ","
-                            + String.valueOf(time) + ","
-                            + String.valueOf(numPregunta);
-                    csvET.write(dato + "\n");
-            	}
-            }
-        } catch (IOException ex) {
-            System.out.println("Error al escribir archivo ET: " + ex);
-        }
+    public void escribirET() throws IOException {
+    	for (String dato : datosTobii) {
+    		try {
+				csvET.write(dato + "\n");
+			} catch (IOException e) {
+				System.out.println("Error al escribir archivo ET: " + e);
+			}
+    	}
+    	csvET.close();
     }
 
     @FXML
     private void initialize(){
         // Elementos de la interfaz gráfica
         nombreCSVLabel.setText("Ningún Archivo CSV seleccionado");
+        numPreguntaLabel.textProperty().bind(Bindings.convert(numPregunta));
+        preguntaLabel.textProperty().bind(Bindings.convert(preguntaActual));
         iniciarButton.setDisable(true);
         intervaloCorrectasField.setText("0");
         verdaderoFalso.setSelected(true);
         tabPane.getTabs().get(1).setDisable(true);
         tabPane.getTabs().get(2).setDisable(true);
-        try {
-            csvET = new FileWriter("et_" + time + ".csv");
-            csvGSR = new FileWriter("gsr_" + time + ".csv");
-            csvPPG = new FileWriter("ppg_" + time + ".csv");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        logger.info("Clase: " + getClass().getName() + " Inicializada");
     }
 
     public void setMainApp(HelloApplication mainApp){
         this.mainApp = mainApp;
+    }
+
+    /**
+     * Función para calibrar el EyeTracker
+     */
+    @FXML
+    private void calibrarEyeTracker() throws IOException {
+        Process procesoCalibracion = Runtime.getRuntime().exec("/opt/TobiiTechConfigurationApplication/tobiitechconfigurationapplication");
+        while (procesoCalibracion.isAlive()){
+            //Pos esperar ni pp
+            //Da error en el IDE porque sale como loop "infinito"
+        }
+        isCalibrado = true;
     }
 
     /**
@@ -246,7 +256,6 @@ public class AdminController {
         );
         fileChooser.setTitle("Selecciona un archivo CSV");
         csvFile = fileChooser.showOpenDialog(anchorPane.getScene().getWindow());
-
         if(csvFile != null){
             nombreCSVLabel.setText(csvFile.getName());
             try {
@@ -256,33 +265,27 @@ public class AdminController {
                         .parse();
                 totalPreguntas = preguntasList.size();
                 nombreCSVLabel.setText(nombreCSVLabel.getText() + "\n" + totalPreguntas + " Reactivos Cargados");
+                logger.info(nombreCSVLabel.getText());
                 iniciarButton.setDisable(false);
                 tabPane.getTabs().get(1).setDisable(false);
                 tabPane.getTabs().get(2).setDisable(false);
             }catch (Exception e){
                 e.printStackTrace();
                 nombreCSVLabel.setText("Archivo Inválido!");
+                logger.warn(nombreCSVLabel.getText());
             }
         }
     }
     
-    int contadorLecturasET = 0;
-    
-    Process process;
-    
-    void detenerLectura() {
-    	if (process.isAlive()) {
-    		process.destroy();
-    		System.out.println("Proceso detenido ET");
-    	}
-    	try {
-			csvET.close();
-            csvGSR.close();
-            csvPPG.close();
-			System.out.println("Archivo de lecturas de ET cerrado");
-		} catch (IOException e) {
-			System.out.println("Error al cerrar el archivo de lecturas");
-		}
+    void detenerLecturaTobii() throws IOException {
+        if(tobiiProcess != null){
+            if (tobiiProcess.isAlive()) {
+                tobiiProcess.destroy();
+                logger.info("Proceso EyeTracker detenido");
+            }
+            escribirET();
+            logger.info("Archivo de lecturas de EyeTracker cerrado");
+        }
     }
 
     /* SERIALPORT LISTENERS */
@@ -295,17 +298,17 @@ public class AdminController {
             try {
                 if (arduinoGSR.isMessageAvailable()) {
                     Double data;
-                    time = System.currentTimeMillis();
+                    currentTime = System.currentTimeMillis();
                     try {
                         data = Double.parseDouble(arduinoGSR.printMessage());
                         int value = (int) Math.round(data);
-                        escribirGSR(value, time, numPregunta);
+                        //escribirGSR(value, time, numPregunta);
                     } catch (ArduinoException | NumberFormatException | SerialPortException ex) {
                         System.out.println("Error data: " + ex);
                     }
                 }
             } catch (ArduinoException | SerialPortException ex) {
-                Logger.getLogger(AdminControllerBAK.class.getName()).log(Level.SEVERE, null, ex);
+                logger.error(ex);
             }
         }
     };
@@ -323,121 +326,124 @@ public class AdminController {
                     Double data = 0.0;
                     data = Double.parseDouble(arduinoPPG.printMessage());
                     int value = (int) Math.round(data);
-                    time = System.currentTimeMillis();
-                    long current_time = (new Date()).getTime();
-                    long calculo = (current_time - date_ini) / 1000;
-                    escribirPPG(value, time, numPregunta);
+                    currentTime = System.currentTimeMillis();
+                    //escribirPPG(value, time, numPregunta);
                 }
             } catch (ArduinoException | SerialPortException ex) {
-                Logger.getLogger(AdminController.class.getName()).log(Level.SEVERE, null, ex);
+                logger.error(ex);
             }
         }
     };
 
-    private void obtenerDatosTobii() {
+    List<String> datosTobii = new ArrayList<String>();
 
+    private void obtenerDatosTobii() {
         try {
-            //TODO: aki le pones la v2
-            String path = "src/main/resources/script_tobii/full_script";
-            File file = new File(path);
-            process = Runtime.getRuntime().exec(file.getAbsolutePath());
-            InputStream processInputStream = process.getInputStream();
-            BufferedReader reader = new BufferedReader(new InputStreamReader(processInputStream));
-            String line = reader.readLine();
-            //double derecho = 0.0;
-            //double izquierdo = 0.0;
+            tobiiProcess = Runtime.getRuntime().exec("./full_script");
+            InputStream tobiiProcessInputStream = tobiiProcess.getInputStream();
+            BufferedReader reader = new BufferedReader(new InputStreamReader(tobiiProcessInputStream));
+            String line;
+            // Inicializamos variables de datos de los ojos
+
             while ((line = reader.readLine()) != null && !reader.equals("exit")) {
+                currentTime = System.currentTimeMillis();
+                String[] inputTobii = line.split(",");
+
+                double rightPupilDiameter = Double.valueOf(inputTobii[0]);
+                double leftPupilDiameter = Double.valueOf(inputTobii[1]);
+                double rightGazePointOnDisplay_X = Double.valueOf(inputTobii[2]);
+                double rightGazePointOnDisplay_Y = Double.valueOf(inputTobii[3]);
+                double leftGazePointOnDisplay_X = Double.valueOf(inputTobii[4]);
+                double leftGazePointOnDisplay_Y = Double.valueOf(inputTobii[5]);
+
+                if (contadorLineasET < 1) {
+                	datosTobii.add("rightPupilDiameter,leftPupilDiameter,rightGazePointOnDisplay_X,rightGazePointOnDisplay_Y,leftGazePointOnDisplay_X,leftGazePointOnDisplay_Y,timestamp,pregunta,respuesta");
+                	contadorLineasET++;
+                } else {
+                	String dato = inputTobii[0] + ","
+                            + inputTobii[1] + ","
+                            + inputTobii[2] + ","
+                            + inputTobii[3] + ","
+                            + inputTobii[4] + ","
+                            + inputTobii[5] + ","
+                            + String.valueOf(currentTime) + ",";
+                    if(numPregunta.get() > 0)
+                        dato += String.valueOf(numPregunta.get());
+                    // Agrega una respuesta si la hay, si no agrega una cadena vacía
+                    dato += ",";
+                    dato += respuesta!=null?(respuesta?"1":"0"):"";
+                    // La respuesta vuelve a ser null
+                    respuesta = null;
+                	datosTobii.add(dato);
+                }
+
+                Platform.runLater(
+                    () -> {
+                        if (seriesTOBIIDerecho.getData().size() == 0) {
+                            if (rightPupilDiameter == 0.0) {
+                                seriesTOBIIDerecho.getData().add(new XYChart.Data<Number, Number>(currentTime,2.5));
+                            } else {
+                                seriesTOBIIDerecho.getData().add(new XYChart.Data<Number, Number>(currentTime,rightPupilDiameter));
+                            }
+                            if (leftPupilDiameter == 0.0) {
+                                seriesTOBIIIzquierdo.getData().add(new XYChart.Data<Number, Number>(currentTime,2.5));
+                            } else {
+                                seriesTOBIIIzquierdo.getData().add(new XYChart.Data<Number, Number>(currentTime,leftPupilDiameter));
+                            }
+                        } else {
+                            if (rightPupilDiameter == 0.0) {
+                                XYChart.Data<Number, Number> previo = seriesTOBIIDerecho.getData().get(seriesTOBIIDerecho.getData().size() - 1);
+                                double previoY = previo.getYValue().doubleValue();
+                                seriesTOBIIDerecho.getData().add(new XYChart.Data<Number, Number>(currentTime,previoY));
+                            } else {
+                                seriesTOBIIDerecho.getData().add(new XYChart.Data<Number, Number>(currentTime,rightPupilDiameter));
+                            }
+                            if (leftPupilDiameter == 0.0) {
+                                XYChart.Data<Number, Number> previo = seriesTOBIIIzquierdo.getData().get(seriesTOBIIIzquierdo.getData().size() - 1);
+                                double previoY = previo.getYValue().doubleValue();
+                                seriesTOBIIIzquierdo.getData().add(new XYChart.Data<Number, Number>(currentTime,previoY));
+                            } else {
+                                seriesTOBIIIzquierdo.getData().add(new XYChart.Data<Number, Number>(currentTime,leftPupilDiameter));
+                            }
+                        }
+
+                        if(seriesTOBIIRightGaze.getData().size()==1)
+                            seriesTOBIIRightGaze.getData().remove(0,1);
+                        seriesTOBIIRightGaze.getData().add(new XYChart.Data<Number, Number>(rightGazePointOnDisplay_X, rightGazePointOnDisplay_Y));
+                        if(seriesTOBIILeftGaze.getData().size()==1)
+                            seriesTOBIILeftGaze.getData().remove(0,1);
+                        seriesTOBIILeftGaze.getData().add(new XYChart.Data<Number, Number>(leftGazePointOnDisplay_X, leftGazePointOnDisplay_Y));
+                        if(graficaTOBIIGaze.getData().size()<1) {
+                            graficaTOBIIGaze.getData().add(seriesTOBIIRightGaze);
+                            graficaTOBIIGaze.getData().add(seriesTOBIILeftGaze);
+                        }
+
+                        XYChart.Data<Number, Number> minder = seriesTOBIIDerecho.getData().get(0);
+                        xAxisTOBII.setLowerBound(minder.getXValue().doubleValue());
+                        xAxisTOBII.setUpperBound(minder.getXValue().doubleValue() + 1500);
+
+                        if(seriesTOBIIIzquierdo.getData().size()>240) {
+                            seriesTOBIIIzquierdo.getData().remove(0,1);
+                            seriesTOBIIDerecho.getData().remove(0,1);
+                        }
+
+                        if(graficaTOBII.getData().size()<1) {
+                            graficaTOBII.getData().add(seriesTOBIIIzquierdo);
+                            graficaTOBII.getData().add(seriesTOBIIDerecho);
+                        }
+
+                    }
+                );
+                /*
                 try {
-                    Thread.sleep(10); //Sleep de 2 segundos
+                    Thread.sleep(8); //Sleep de 2 segundos
                 } catch (InterruptedException ex) {
                     System.out.println("Error en thread de eye tracker: " + ex);
-                }
-            	
-                time = System.currentTimeMillis();
-                String[] parts = line.split(",");
-                double derecho = Double.valueOf(parts[0]);
-                double izquierdo = Double.valueOf(parts[1]);
-                contadorLecturasET++;
-                    if (numPregunta == 0 || numPregunta == 1 || numPregunta == 2) {
-                        /*escribirET(
-                                String.valueOf(izquierdo) + ","
-                                        + String.valueOf(derecho) + ","
-                                        + String.valueOf(time) + ","
-                                        + String.valueOf(0)
-                        );*/
-                        escribirET(izquierdo,derecho,time,0);
-                    } else {
-                        /*escribirET(
-                                String.valueOf(izquierdo) + ","
-                                        + String.valueOf(derecho) + ","
-                                        + String.valueOf(time) + ","
-                                        + String.valueOf(numPregunta)
-                        );*/
-                        escribirET(izquierdo,derecho,time,numPregunta-2);
-                    }
-                
-
-                //double suma = (derecho + izquierdo) / 2;
-
-                //SeriesTobbi.add(time, suma);
-                Platform.runLater(
-                        () -> {
-                            if (seriesTOBIIDerecho.getData().size() == 0) {
-                                if (derecho == 0.0) {
-                                    seriesTOBIIDerecho.getData().add(new XYChart.Data<Number, Number>(time,2.5));
-                                } else {
-                                    seriesTOBIIDerecho.getData().add(new XYChart.Data<Number, Number>(time,derecho));
-                                }
-                                if (izquierdo == 0.0) {
-                                    seriesTOBIIIzquierdo.getData().add(new XYChart.Data<Number, Number>(time,2.5));
-                                } else {
-                                    seriesTOBIIIzquierdo.getData().add(new XYChart.Data<Number, Number>(time,izquierdo));
-                                }
-                            } else {
-                                if (derecho == 0.0) {
-                                    XYChart.Data<Number, Number> previo = seriesTOBIIDerecho.getData().get(seriesTOBIIDerecho.getData().size() - 1);
-                                    double previoY = previo.getYValue().doubleValue();
-                                    seriesTOBIIDerecho.getData().add(new XYChart.Data<Number, Number>(time,previoY));
-                                } else {
-                                    seriesTOBIIDerecho.getData().add(new XYChart.Data<Number, Number>(time,derecho));
-                                }
-                                if (izquierdo == 0.0) {
-                                    XYChart.Data<Number, Number> previo = seriesTOBIIIzquierdo.getData().get(seriesTOBIIIzquierdo.getData().size() - 1);
-                                    double previoY = previo.getYValue().doubleValue();
-                                    seriesTOBIIIzquierdo.getData().add(new XYChart.Data<Number, Number>(time,previoY));
-                                } else {
-                                    seriesTOBIIIzquierdo.getData().add(new XYChart.Data<Number, Number>(time,izquierdo));
-                                }
-                            }
-
-                        	/*seriesTOBIIDerecho.getData().add(new XYChart.Data<Number, Number>(time,derecho));
-                        	seriesTOBIIIzquierdo.getData().add(new XYChart.Data<Number, Number>(time,izquierdo));*/
-
-                            XYChart.Data<Number, Number> minder = seriesTOBIIDerecho.getData().get(0);
-                            xAxisTOBII.setLowerBound(minder.getXValue().doubleValue());
-                            xAxisTOBII.setUpperBound(minder.getXValue().doubleValue() + 1500);
-
-                            if(seriesTOBIIIzquierdo.getData().size()>240) {
-                                seriesTOBIIIzquierdo.getData().remove(0,1);
-                                seriesTOBIIDerecho.getData().remove(0,1);
-                            }
-
-                            if(graficaTOBII.getData().size()<1) {
-                                graficaTOBII.getData().add(seriesTOBIIIzquierdo);
-                                graficaTOBII.getData().add(seriesTOBIIDerecho);
-                            }
-                            
-                            
-                            	
-                            /*XYChart.Data<Number, Number> minizq = seriesTOBIIIzquierdo.getData().get(0);
-                            xAxisTOBII.setLowerBound(minizq.getXValue().doubleValue());
-                            xAxisTOBII.setUpperBound(minizq.getXValue().doubleValue() + 500);*/
-                        }
-                );
+                }*/
 
             }
         } catch (IOException ex) {
-            System.out.println("Error lectura de output Tobii: " + ex);
+            logger.info("Error lectura de output Tobii: " + ex);
         }
     }
 
@@ -446,6 +452,18 @@ public class AdminController {
      */
     @FXML
     private void iniciarPreguntas() throws IOException {
+        if(!isCalibrado){
+            Alert alerta = new Alert(Alert.AlertType.CONFIRMATION);
+            alerta.setTitle("!EyeTracker no Calibrado!");
+            String mensaje = "Eye Tracker no se ha calibrado, ¿Deseas continuar sin la calibración?";
+            alerta.setContentText(mensaje);
+
+            Optional<ButtonType> resultado = alerta.showAndWait();
+            if ((resultado.isPresent() && (resultado.get() == ButtonType.CANCEL))){
+                calibrarEyeTracker();
+            }
+        }
+        this.date_ini = (new Date()).getTime();
         // Inicializar variables
         numLecturasPPG = 0;
         sumaLecturasPPG = 0.0;
@@ -453,20 +471,20 @@ public class AdminController {
         media = 512.0;
         lecturasPPG = new ArrayList<>();
         long tiempo = (new Date()).getTime();
-        ultimoTiempo = (new Date()).getTime();
         this.date_ini = (new Date()).getTime();
 
         // Elementos Gráficos
         tabPane.getSelectionModel().selectNext();
         iniciarButton.setDisable(true);
         cargaCSVButton.setDisable(true);
+        calibrarButton.setDisable(true);
         verdaderoFalso.setDisable(true);
 
         // Gráfica TOBII
         seriesTOBIIDerecho = new XYChart.Series<Number, Number>();
         seriesTOBIIIzquierdo = new XYChart.Series<Number, Number>();
-        seriesTOBIIDerecho.setName("TOBII Ojo Derecho");
-        seriesTOBIIIzquierdo.setName("TOBII Ojo Izquierdo");
+        seriesTOBIIDerecho.setName("Diámetro de Pupila Derecha");
+        seriesTOBIIIzquierdo.setName("Diámetro de Pupila Izquierda");
 
         xAxisTOBII.setForceZeroInRange(false);
         xAxisTOBII.setTickLabelsVisible(true);
@@ -478,16 +496,48 @@ public class AdminController {
         yAxisTOBII.setUpperBound(4.0);
         yAxisTOBII.setForceZeroInRange(false);
 
-        //graficaTOBII.legendVisibleProperty().setValue(false); //Quizá necesitemos especificar qué es cada color :v
+        //graficaTOBII.legendVisibleProperty().setValue(false);
         graficaTOBII.setCreateSymbols(false);
         graficaTOBII.setAnimated(false);
+
+        // Grafica TOBII Gaze
+        seriesTOBIIRightGaze = new XYChart.Series<Number, Number>();
+        seriesTOBIIRightGaze.setName("Posición de Ojo Derecho");
+        seriesTOBIILeftGaze = new XYChart.Series<Number, Number>();
+        seriesTOBIILeftGaze.setName("Posición de Ojo Izquierdo");
+
+        xAxisTOBIIGaze.setForceZeroInRange(false);
+        xAxisTOBIIGaze.setTickLabelsVisible(true);
+        xAxisTOBIIGaze.setTickLabelsVisible(true);
+        xAxisTOBIIGaze.setAutoRanging(false);
+        xAxisTOBIIGaze.setLowerBound(-0.1);
+        xAxisTOBIIGaze.setUpperBound(1.1);
+
+        yAxisTOBIIGaze.setLowerBound(1.1);
+        yAxisTOBIIGaze.setUpperBound(-0.1);
+        yAxisTOBIIGaze.setForceZeroInRange(true);
+        yAxisTOBIIGaze.setAutoRanging(false);
+
+        graficaTOBIIGaze.setCreateSymbols(true);
+        graficaTOBIIGaze.setAnimated(false);
+
+
+        // Crear archivos CSV
+        try {
+            currentTime = System.currentTimeMillis();
+            csvET = new FileWriter("et_" + currentTime + ".csv");
+            /*csvGSR = new FileWriter("gsr_" + currentTime + ".csv");
+            csvPPG = new FileWriter("ppg_" + currentTime + ".csv");*/
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
         // Carga la segunda ventana
         FXMLLoader loader = new FXMLLoader(getClass().getResource("primary.fxml"));
         // Si tenemos la segunda pantalla
-        Screen pantalla2 = Screen.getScreens().size()>1?Screen.getScreens().get(0):Screen.getPrimary();
+        Screen pantalla2 = Screen.getScreens().size()>1?Screen.getScreens().get(1):Screen.getPrimary();
         Parent root = loader.load();
-        PrimaryController preguntas = loader.getController();
+        preguntas = loader.getController();
         // Indicarle quien es su 'Padre'
         preguntas.setParentController(this);
         // Pasarle datos de configuración
@@ -497,48 +547,53 @@ public class AdminController {
         }
         preguntas.setIntervaloCorrectas(Integer.parseInt(intervaloCorrectasField.getText()));
 
-        Stage stage = new Stage();
-        stage.setX(pantalla2.getVisualBounds().getMinX());
-        stage.setY(pantalla2.getVisualBounds().getMinY());
-        stage.setWidth(pantalla2.getVisualBounds().getWidth());
-        stage.setHeight(pantalla2.getVisualBounds().getHeight());
-        stage.setScene(new Scene(root));
-        stage.setTitle("Preguntas");
-        stage.show();
-        stage.setMaximized(true);
+        stagePreguntas = new Stage();
+        stagePreguntas.setX(pantalla2.getVisualBounds().getMinX());
+        stagePreguntas.setY(pantalla2.getVisualBounds().getMinY());
+        stagePreguntas.setWidth(pantalla2.getVisualBounds().getWidth());
+        stagePreguntas.setHeight(pantalla2.getVisualBounds().getHeight());
+        stagePreguntas.setScene(new Scene(root));
+        stagePreguntas.setTitle("Preguntas");
+        stagePreguntas.show();
+        stagePreguntas.setMaximized(true);
 
         // Manejar el cierre de la ventana
         // Detener el contador
-        stage.setOnCloseRequest( event -> {
+        stagePreguntas.setOnCloseRequest( event -> {
             if(preguntas.timer != null)
                 preguntas.timer.stop();
             iniciarButton.setDisable(false);
             cargaCSVButton.setDisable(false);
             verdaderoFalso.setDisable(false);
             tabPane.getSelectionModel().selectFirst();
-            this.detenerLectura();
+            try {
+                this.detenerLecturaTobii();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         });
-        
         Thread t1 = new Thread() {
             public void run() {
                 obtenerDatosTobii();
             }
         };
         t1.start();
-
-        try {
-            arduinoPPG.arduinoRX(puertoSerialPPG, baudingPPG, ListenerPPG);
+        // Sensores GSR y PPG
+        /*try {
+            //arduinoPPG.arduinoRX(puertoSerialPPG, baudingPPG, ListenerPPG);
             //arduinoGSR.arduinoRX(puertoSerialGSR, baudingGSR, ListenerGSR);
         } catch (ArduinoException ex) {
             Logger.getLogger(GraficasMedicion.class.getName()).log(Level.SEVERE, null, ex);
         } catch (SerialPortException ex) {
             Logger.getLogger(GraficasMedicion.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        }*/
     }
 
     @FXML
-    private void salir(){
-    	
+    private void salir() throws IOException {
+        if(stagePreguntas != null)
+            new WindowEvent(stagePreguntas, WindowEvent.WINDOW_CLOSE_REQUEST);
+        detenerLecturaTobii();
         System.exit(0);
     }
 
@@ -548,55 +603,20 @@ public class AdminController {
         return preguntasList;
     }
 
-    public void setPreguntasList(List<Pregunta> preguntasList) {
-        this.preguntasList = preguntasList;
-    }
-
-    public int getTotalPreguntas() {
-        return totalPreguntas;
-    }
-
-    public void setTotalPreguntas(int totalPreguntas) {
-        this.totalPreguntas = totalPreguntas;
-    }
-
     public Label getPreguntaLabel() {
         return preguntaLabel;
-    }
-
-    public void setPreguntaLabel(Label preguntaLabel) {
-        this.preguntaLabel = preguntaLabel;
-    }
-
-    public Label getNumPreguntaLabel() {
-        return numPreguntaLabel;
-    }
-
-    public void setNumPreguntaLabel(Label numPreguntaLabel) {
-        this.numPreguntaLabel = numPreguntaLabel;
-    }
-
-    public Label getRespuestaLabel() {
-        return respuestaLabel;
-    }
-
-    public void setRespuestaLabel(Label respuestaLabel) {
-        this.respuestaLabel = respuestaLabel;
     }
 
     public boolean isBandera() {
         return bandera;
     }
 
-    public void setBandera(boolean bandera) {
+    public void setBandera(boolean bandera, Boolean respuesta) {
         this.bandera = bandera;
+        this.respuesta = respuesta;
     }
 
-    public int getNumPregunta() {
-        return numPregunta;
-    }
-
-    public void setNumPregunta(int numPregunta) {
-        this.numPregunta = numPregunta;
+    public void setNumPregunta(Integer numPregunta) {
+        this.numPregunta.set(numPregunta);
     }
 }
